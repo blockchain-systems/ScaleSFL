@@ -1,0 +1,5 @@
+Flask==2.0.2
+flwr==0.17.0
+jupyter==1.0.0
+pip==21.3.1
+torchvision==0.11.1
