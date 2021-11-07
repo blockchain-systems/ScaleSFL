@@ -23,3 +23,7 @@ ssh-keygen -t rsa -f example_rsa
 ```sh
 pip list --not-required --format freeze > requirements.txt
 ```
+
+```sh
+docker run -e PORT=7000 --rm --network host openmined/grid-domain
+```

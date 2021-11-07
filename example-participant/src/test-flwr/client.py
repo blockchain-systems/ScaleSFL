@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from logging import INFO, log
 import warnings
 
 import flwr as fl
@@ -115,10 +116,11 @@ def main():
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
+            log(INFO, f"accuracy: {accuracy}")
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("[::]:8080", client=CifarClient())
+    fl.client.start_numpy_client("localhost:8080", client=CifarClient())
 
 
 if __name__ == "__main__":
