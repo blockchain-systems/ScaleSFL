@@ -5,12 +5,12 @@ Using [PySyft v0.5.0](https://github.com/OpenMined/PySyft/tree/syft_0.5.0)
 Followng the [model-centric FL examples](https://github.com/OpenMined/PySyft/tree/syft_0.5.0/packages/syft/examples/federated-learning/model-centric)
 
 ```sh
-python -m venv .venv
+pip install poetry --user
 
-source .venv/bin/activate
-
-pip install -r requirements.txt
+poetry install
 ```
+
+Install a version of [PyTorch](https://pytorch.org/get-started/locally/) (if no supported GPU, make sure to install CPU)
 
 ```sh
 docker run -it --rm --network host python3.9.7 bash

@@ -1,3 +1,10 @@
+# Emacs backup files
+*~
+*#
+.#*
+# Vim file artifacts
+.*.sw*
+
 ### Flask ###
 instance/*
 !instance/.gitignore
@@ -12,8 +19,29 @@ __pycache__/
 
 # Environments
 .venv
+.venv-syft
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# installed platform-specific binaries
+bin/
+config/
+.DS_Store
+.project
+
+# omit Go vendor directories
+vendor/
+.vscode
+.gradle
+.idea
+
+# Dependency directories
+node_modules/
+
+# Ignore Gradle build output directory
+build
+package-lock.json
+external-chaincode/
