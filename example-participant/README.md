@@ -10,6 +10,7 @@ pip install poetry --user
 poetry install
 ```
 
+Fabric SDK: https://github.com/hyperledger/fabric-sdk-py
 Install a version of [PyTorch](https://pytorch.org/get-started/locally/) (if no supported GPU, make sure to install CPU)
 
 ```sh
