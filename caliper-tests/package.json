@@ -1,0 +1,18 @@
+{
+    "name": "caliper-tests",
+    "version": "0.0.1",
+    "description": "Caliper tests for testing sharding performance",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Hyperledger",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@hyperledger/caliper-cli": "^0.4.2",
+        "fabric-ca-client": "^2.2.3",
+        "fabric-common": "^2.1.0",
+        "fabric-network": "^2.2.3",
+        "fabric-protos": "^2.1.0"
+    }
+}
