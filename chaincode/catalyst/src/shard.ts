@@ -8,15 +8,15 @@ export class Shard {
     public docType?: ShardTypes = "shard";
 
     @Property()
-    public ID: string = "";
+    public ID!: string;
 
     @Property()
-    public Channel: string = "";
+    public Channel!: string;
 
     // this can be found using the discovery CLI
     @Property()
-    public MinPeers: number = 0;
+    public MinPeers!: number;
 
     @Property()
-    public PinnedHash: string = "";
+    public PinnedHash!: string;
 }

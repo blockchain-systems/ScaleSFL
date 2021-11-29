@@ -8,14 +8,14 @@ export class Model {
     public docType?: ModelTypes = "model";
 
     @Property()
-    public ID: string = "";
+    public ID!: string;
 
     @Property()
-    public Hash: string = "";
+    public Hash!: string;
 
     @Property()
-    public Owner: string = "";
+    public Owner!: string;
 
     @Property()
-    public EvaluationAccuracy: number = 0;
+    public EvaluationAccuracy!: number;
 }

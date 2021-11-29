@@ -33,15 +33,22 @@ To create a channel we can use the following command
 
 ```sh
 ./network.sh createChannel -c mainline
+./network.sh createChannel -c shard1
 ```
 
-Next we'll deploy some sample chaincode to in using
+Next we'll deploy the model catalyst chaincode to in using
 
 ```sh
 ./network.sh deployCC \
     -c mainline \
-    -ccn basic \
-    -ccp ../asset-transfer-basic/chaincode-typescript \
+    -ccn catalyst \
+    -ccp ../chaincode/catalyst \
+    -ccl typescript
+
+./network.sh deployCC \
+    -c shard1 \
+    -ccn models \
+    -ccp ../chaincode/shard \
     -ccl typescript
 ```
 
@@ -90,7 +97,7 @@ Next invoke the chaincode by calling
 
 ```sh
 peer chaincode invoke \
-    -n basic \
+    -n catalyst \
     -C mainline \
     -o localhost:7050 \
     --tls \
@@ -103,10 +110,25 @@ peer chaincode invoke \
     -c '{"function":"InitLedger","Args":[]}'
 ```
 
-Now query the chaincode, we'll get all assets using
+```sh
+peer chaincode invoke \
+    -n models \
+    -C shard1 \
+    -o localhost:7050 \
+    --tls \
+    --ordererTLSHostnameOverride orderer.example.com \
+    --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+    --peerAddresses localhost:7051 \
+    --peerAddresses localhost:9051 \
+    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+    -c '{"function":"InitLedger","Args":[]}'
+```
+
+Now query the chaincode, we'll get all shards using
 
 ```sh
-peer chaincode query -C mainline -n basic -c '{"Args":["GetAllAssets"]}'
+peer chaincode query -C mainline -n catalyst -c '{"Args":["GetAllShardss"]}'
 ```
 
 Now transfer an asset by
