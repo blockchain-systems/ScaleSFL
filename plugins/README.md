@@ -10,7 +10,7 @@ To build the plugin use:
 go build -buildmode=plugin -o escc.so plugin.go
 ```
 
-This will produce a `escc.so` (endorsement system chaincode) shared library file. We'll specify this in the `config/core.yaml` file, as well as making volume of it for our peers, in the `test-network/docker/docker-compose-test-n
+This will produce a `escc.so` (endorsement system chaincode) shared library file. We'll specify this in the `config/core.yaml` file, as well as making volume of it for our peers, in the `test-network/docker/docker-compose-test-net.yaml`
 
 Note we'll have to compile this with the same version of go, GOPATH, etc.
 
@@ -28,7 +28,7 @@ cp $CONTAINER_ID:/go/src/bfl/plugins/modelEndorsement/escc.so escc.so
 ```
 
 Note a sample `escc.so` file has been included in this project  
-Note you'll need to specifiy a flask url in the docker `docker-compose-test-net.yaml` file
+Note you'll need to specifiy a flask url in the docker `docker-compose-test-net.yaml` file (for endorsements)
 
 ---
 
@@ -56,4 +56,10 @@ cp ../Sharded-Committee-Consensus-in-Blockchain-based-Federated-Learning/plugins
 ```sh
 rm -rf build/
 make peer-docker
+```
+
+To retrieve the plugin `.so` file you can use
+
+```sh
+docker cp $CONTAINER_ID:/etc/hyperledger/fabric/plugin/escc.so escc.so
 ```

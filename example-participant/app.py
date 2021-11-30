@@ -1,38 +1,85 @@
 import os
-import hashlib
+import re
+import json
+import base64
+import requests
 import threading
 from flask import Flask
-from flask import request
-from flwr.common import serde
+from flask import request, abort
 
 from src.client import client_pipline
+from src.utils.model import deserialize_model, model_info
+from src.utils.endorsement import endorse_model
 
 PORT = os.environ.get("PORT") or 3000
 app = Flask(__name__)
 
-lol = 0
-
 
 @app.route("/")
 def index():
-    global lol
-    lol += 1
-    return "Hello World!" + str(lol)
+    return "Hello World!"
 
 
 @app.route("/model")
-def model_info():
-    parameters_res = client.get_parameters()
-    parameters_res_proto = serde.parameters_res_to_proto(parameters_res)
-    serialized_model = parameters_res_proto.SerializeToString(True)
+def model():
+    info = model_info(client)
 
-    return {"model_hash": hashlib.sha256(serialized_model).hexdigest()}
+    return {
+        "model_hash": info["model_hash"],
+        "serialized_model": info["serialized_model"],
+    }
+
+
+@app.route("/model/hash")
+def model_info_hash():
+    info = model_info(client)
+
+    return {"model_hash": info["model_hash"]}
 
 
 @app.route("/evaluate", methods=["POST"])
 def evaluate_model():
     serialized_model = request.data
-    pass
+    parameters_res = deserialize_model(serialized_model)
+
+    eval_res = client.evaluate({"parameters": parameters_res.parameters, "config": {}})
+    eval = json.dumps(eval_res)
+
+    return eval
+
+
+@app.route("/endorse/evaluate", methods=["POST"])
+def evaluate_rwset():
+    rwSet = json.loads(request.data)
+    nsRwSets = rwSet["NsRwSets"]
+    for nsRwSet in nsRwSets:
+        ns = nsRwSet["NameSpace"]
+        kvRwSet = nsRwSet["KvRwSet"]
+        # Check if the contract being called is a shard, and it is being written to
+        if re.match("shard\d+", ns) and "writes" in kvRwSet:
+            for write in kvRwSet["writes"]:
+                _, bc_model = write["key"], json.loads(base64.decode(write["value"]))
+
+                res = requests.get(f"{bc_model.Server}/model").json()
+                serialized_model = res["serialized_model"]
+
+                parameters_res = deserialize_model(serialized_model)
+                parameters = parameters_res.parameters
+
+                eval_res = client.evaluate(
+                    {"parameters": parameters_res.parameters, "config": {}}
+                )
+
+                if (
+                    eval_res.metrics["accuracy"] or eval_res.accuracy
+                ) < client.numpy_client.highest_acc - 5:  # check if model is good
+                    abort(418)  # if not tell them they cant have coffee
+
+                if not endorse_model(client, parameters):  # check if model is good
+                    abort(418)  # if not tell them they cant have coffee
+
+    # return eval
+    return {"status": 200}, 200
 
 
 if __name__ == "__main__":
@@ -40,5 +87,5 @@ if __name__ == "__main__":
     threading.Thread(target=lambda: app.run(host="0.0.0.0", port=PORT)).start()
 
     # Start flower
-    # client, start_client = client_pipline()
-    # start_client()
+    client, start_client = client_pipline()
+    start_client()

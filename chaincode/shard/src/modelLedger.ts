@@ -10,9 +10,11 @@ export class ModelLedgerContract extends Contract {
     public async InitLedger(ctx: Context): Promise<void> {
         const models: Model[] = [
             {
-                ID: "1",
+                ID: "model1",
                 Hash: "",
-                Owner: "",
+                Owner: "me",
+                Server: "http://192.168.1.170:3000",
+                Round: 1,
                 EvaluationAccuracy: 0
             }
         ];
@@ -31,6 +33,8 @@ export class ModelLedgerContract extends Contract {
         id: string,
         hash: string,
         owner: string,
+        server: string,
+        round: number,
         accuracy: number
     ): Promise<void> {
         const exists = await this.ModelExists(ctx, id);
@@ -43,6 +47,8 @@ export class ModelLedgerContract extends Contract {
             ID: id,
             Hash: hash,
             Owner: owner,
+            Server: server,
+            Round: round,
             EvaluationAccuracy: accuracy
         };
         await ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(model))));
@@ -66,6 +72,8 @@ export class ModelLedgerContract extends Contract {
         id: string,
         hash: string,
         owner: string,
+        server: string,
+        round: number,
         accuracy: number
     ): Promise<void> {
         const exists = await this.ModelExists(ctx, id);
@@ -79,6 +87,8 @@ export class ModelLedgerContract extends Contract {
             ID: id,
             Hash: hash,
             Owner: owner,
+            Server: server,
+            Round: round,
             EvaluationAccuracy: accuracy
         };
         return ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(updatedModel))));

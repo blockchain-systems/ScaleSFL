@@ -1,19 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	endorsement "github.com/hyperledger/fabric/core/handlers/endorsement/api"
 	identities "github.com/hyperledger/fabric/core/handlers/endorsement/api/identities"
+	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
 )
 
-
-var FLASK_PORT = os.Getenv("FLASK_SERVER")
-
+var FLASK_SERVER = os.Getenv("FLASK_SERVER")
 
 // To build the plugin,
 // run:
@@ -56,11 +58,25 @@ func (e *ModelEndorsement) Endorse(prpBytes []byte, sp *peer.SignedProposal) (*p
 	}
 	endorsement := &peer.Endorsement{Signature: signature, Endorser: identityBytes}
 
-	resp, err := http.Get(FLASK_PORT)
+	// Get the ProposalResponsePayload
+	prp := &peer.ProposalResponsePayload{}
+	proto.Unmarshal(prpBytes, prp)
+
+	chaincodeAction := &peer.ChaincodeAction{}
+	proto.Unmarshal(prp.Extension, chaincodeAction)
+
+	txRWSet := &rwsetutil.TxRwSet{}
+	txRWSet.FromProtoBytes(chaincodeAction.Results)
+
+	txRWSetJSON, err := json.Marshal(txRWSet)
+
+	resp, err := http.Post(FLASK_SERVER, "application/json", bytes.NewBuffer(txRWSetJSON))
 	if err != nil {
 		return nil, nil, fmt.Errorf("Could not evaluate model: %v", err)
 	}
-	fmt.Println(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, nil, fmt.Errorf("Could not evaluate model: %v", err)
+	}
 
 	return endorsement, prpBytes, nil
 }

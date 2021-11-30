@@ -17,5 +17,11 @@ export class Model {
     public Owner!: string;
 
     @Property()
+    public Server!: string;
+
+    @Property()
+    public Round!: number;
+
+    @Property()
     public EvaluationAccuracy!: number;
 }

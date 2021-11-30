@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
-from .model import Net
+from .models.simple_cnn import Net
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -83,6 +83,10 @@ def client_pipline():
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.highest_acc = 0
+
         def get_parameters(self):
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -99,6 +103,7 @@ def client_pipline():
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
+            self.highest_acc = max(self.highest_acc, accuracy)
             log(INFO, f"accuracy: {accuracy}")
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
