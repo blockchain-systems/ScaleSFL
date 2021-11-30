@@ -28,7 +28,7 @@ venv.bak/
 
 # installed platform-specific binaries
 bin/
-config/
+# config/
 .DS_Store
 .project
 

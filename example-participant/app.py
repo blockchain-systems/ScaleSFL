@@ -10,10 +10,14 @@ from src.client import client_pipline
 PORT = os.environ.get("PORT") or 3000
 app = Flask(__name__)
 
+lol = 0
+
 
 @app.route("/")
 def index():
-    return "Hello World!"
+    global lol
+    lol += 1
+    return "Hello World!" + str(lol)
 
 
 @app.route("/model")
@@ -36,5 +40,5 @@ if __name__ == "__main__":
     threading.Thread(target=lambda: app.run(host="0.0.0.0", port=PORT)).start()
 
     # Start flower
-    client, start_client = client_pipline()
-    start_client()
+    # client, start_client = client_pipline()
+    # start_client()

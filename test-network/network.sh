@@ -339,8 +339,8 @@ CC_SEQUENCE=1
 DATABASE="leveldb"
 
 # Get docker sock path from environment variable
-SOCK="${DOCKER_HOST:-/var/run/docker.sock}"
-DOCKER_SOCK="${SOCK##unix://}"
+export SOCK="${DOCKER_HOST:-/var/run/docker.sock}"
+export DOCKER_SOCK="${SOCK##unix://}"
 
 # Parse commandline args
 
