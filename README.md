@@ -131,6 +131,8 @@ Now query the chaincode, we'll get all shards using
 peer chaincode query -C mainline -n catalyst -c '{"Args":["GetAllShardss"]}'
 ```
 
+---
+
 Now transfer an asset by
 
 ```sh
@@ -157,6 +159,8 @@ peer chaincode query -C mainline -n basic -c '{"Args":["ReadAsset","asset6"]}'
 ```
 
 will show the asset has been transferred to "Christopher"
+
+---
 
 Finally make sure to bring down the network
 

@@ -8,13 +8,13 @@ First install the dependencies
 yarn
 ```
 
-Now we need to bind caliper to a version of Fabric being used
+If you need to change the fabric version (from 2.1.0), bind caliper to the version of Fabric being used
 
 ```sh
 npx caliper bind --caliper-bind-sut fabric:2.1.0
 ```
 
-You will also need to generate the crypto configuration
+If you use a caliper created SUT, you will also need to generate the crypto configuration. We use the test-network so this is not needed
 
 ```sh
 cd networks/fabric/config_solo_raft
@@ -23,7 +23,7 @@ cd networks/fabric/config_solo_raft
 ```
 
 ```sh
-cd ../../..
+cd $CALIPER_FOLDER_ROOT
 
 npx caliper launch manager \
     --caliper-workspace . \

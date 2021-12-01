@@ -8,7 +8,7 @@ from flask import Flask
 from flask import request, abort
 
 from src.client import client_pipline
-from src.utils.model import deserialize_model, model_info
+from src.utils.model import client_model_info, deserialize_model, model_info
 from src.utils.endorsement import endorse_model
 
 PORT = os.environ.get("PORT") or 3000
@@ -22,7 +22,7 @@ def index():
 
 @app.route("/model")
 def model():
-    info = model_info(client)
+    info = client_model_info(client)
 
     return {
         "model_hash": info["model_hash"],
@@ -32,7 +32,7 @@ def model():
 
 @app.route("/model/hash")
 def model_info_hash():
-    info = model_info(client)
+    info = client_model_info(client)
 
     return {"model_hash": info["model_hash"]}
 
@@ -62,20 +62,18 @@ def evaluate_rwset():
 
                 res = requests.get(f"{bc_model.Server}/model").json()
                 serialized_model = res["serialized_model"]
+                model_hash = res["model_hash"]
 
                 parameters_res = deserialize_model(serialized_model)
                 parameters = parameters_res.parameters
+                info = model_info(parameters_res)
 
-                eval_res = client.evaluate(
-                    {"parameters": parameters_res.parameters, "config": {}}
-                )
-
-                if (
-                    eval_res.metrics["accuracy"] or eval_res.accuracy
-                ) < client.numpy_client.highest_acc - 5:  # check if model is good
+                # check if the claimed hash matches the actual from parameters
+                if model_hash != info["model_hash"]:
                     abort(418)  # if not tell them they cant have coffee
 
-                if not endorse_model(client, parameters):  # check if model is good
+                # check if model is good
+                if not endorse_model(client, parameters):
                     abort(418)  # if not tell them they cant have coffee
 
     # return eval

@@ -24,10 +24,12 @@ class CreateModelsWorkload extends WorkloadModuleBase {
             contractFunction: "CreateModel",
             invokerIdentity: "User1",
             contractArguments: [
-                this.txIndex,
-                crypto.randomBytes(256).toString("hex"),
-                "me",
-                Math.random() * 100
+                `model_${this.workerIndex}_${this.txIndex}`, // ID
+                crypto.randomBytes(256).toString("hex"), // Hash
+                `worker${this.workerIndex}`, // Owner
+                "http://192.168.1.170:3000", // Server
+                1, // Round
+                Math.random() * 100 // EvaluationAccuracy
             ],
             readOnly: false,
             timeout: 60

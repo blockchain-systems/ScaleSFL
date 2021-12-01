@@ -9,6 +9,7 @@ python = "^3.9"
 Flask = "^2.0.2"
 flwr = "^0.17.0"
 fabric-sdk-py = "^1.0.0"
+seaborn = "^0.11.2"
 
 [tool.poetry.dev-dependencies]
 ipykernel = "^6.5.1"
