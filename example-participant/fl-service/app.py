@@ -1,15 +1,19 @@
 import os
 import re
 import json
+import signal
 import base64
 import requests
 import threading
 from flask import Flask
 from flask import request, abort
+from InquirerPy import inquirer
+from InquirerPy.base.control import Choice
 
 from src.client import client_pipline
 from src.utils.model import client_model_info, deserialize_model, model_info
 from src.utils.endorsement import endorse_model
+from src.fabric.chaincode import invoke_chaincode, query_chaincode
 
 PORT = os.environ.get("PORT") or 3000
 app = Flask(__name__)
@@ -80,10 +84,25 @@ def evaluate_rwset():
     return {"status": 200}, 200
 
 
+# actions
+START_FL = "start-fl"
+
+
 if __name__ == "__main__":
     # Start Flask
-    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=PORT)).start()
+    flask_thread = threading.Thread(target=lambda: app.run(host="0.0.0.0", port=PORT))
+    flask_thread.setDaemon(True)
+    flask_thread.start()
 
     # Start flower
-    client, start_client = client_pipline()
-    start_client()
+    while action := inquirer.select(
+        message="What's next?",
+        choices=[
+            Choice(START_FL, name="Start FL Round"),
+            Choice(value=None, name="Exit"),
+        ],
+        default=START_FL,
+    ).execute():
+        if action == START_FL:
+            client, start_client = client_pipline()
+            start_client()

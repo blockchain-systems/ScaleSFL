@@ -4,9 +4,11 @@ For the Example Participant, we use the [Flower](https://flower.dev/) framekwork
 
 This will run a gRPC server for federated learning, and we also make use of a local [Flask](https://flask.palletsprojects.com) server to handle our implementation specific needs (such as a way for the peer to evaluate models).
 
-We also make use of the [Fabric SDK](https://github.com/hyperledger/fabric-sdk-py) here to submit models to the ledger.
+We also make use of the [Fabric SDK](https://hyperledger.github.io/fabric-sdk-node/) here to submit models to the ledger. We use the [Node.js](https://nodejs.org/) Fabric SDK here since the Python SDK is unsupported for newer releases of Fabric (2.2).
 
-# How to Run
+## How to Run
+
+### Federated Learning Service
 
 First make sure you have the required version of python installed (^3.9), and install poetry
 
@@ -38,4 +40,14 @@ Finally you can start the servers by running
 
 ```sh
 ./run.sh
+```
+
+### Fabric SDK Service
+
+This service uses an express API to allow the client to interface with the blockchain network using the Fabric SDK.
+
+To run this, use
+
+```sh
+npm run start
 ```

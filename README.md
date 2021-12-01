@@ -26,7 +26,7 @@ This project relies on several componenets to test. The first step is to bring u
 
 ```sh
 ./network.sh down # remove any containers from previous runs (optional)
-./network.sh up
+./network.sh up -ca
 ```
 
 To create a channel we can use the following command

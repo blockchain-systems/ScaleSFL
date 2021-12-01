@@ -5,7 +5,7 @@ starttime=$(date +%s)
 
 # Bring network up
 ./network.sh down # remove any containers from previous runs (optional)
-./network.sh up
+./network.sh up -ca
 
 # Create channels
 ./network.sh createChannel -c mainline
