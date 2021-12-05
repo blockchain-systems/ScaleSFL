@@ -45,7 +45,7 @@ def server_pipline(config: Dict[str, int] = {}):
     # Start client
     return strategy, lambda: fl.server.start_server(
         server_address="localhost:8080",
-        config={"num_rounds": 3, **config},
+        config={"num_rounds": 1, **config},
         strategy=strategy,
     )
 

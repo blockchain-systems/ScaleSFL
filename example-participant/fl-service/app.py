@@ -1,10 +1,8 @@
 import os
 import re
 import json
-import signal
 import base64
 import requests
-import threading
 from flask import Flask
 from flask import request, abort
 
@@ -30,28 +28,33 @@ def index():
 def start_fl():
     round = request.args.get("round")
 
+    def post_model():
+        client.numpy_client.evaluate(client.numpy_client.get_parameters())
+
+        # push weights learned locally
+        info = client_model_info(client)
+        invoke_chaincode(
+            FABRIC_CHANNEL,
+            CHAINCODE_CONTRACT,
+            CHAINCODE_CREATE_MODEL_FN,
+            [
+                f"model_{info['model_hash']}",
+                info["model_hash"],
+                PORT,
+                request.host_url,
+                round,
+                client.numpy_client.checkpoint_info["last_acc"],
+            ],
+            port=CLIENT_PORT,
+        )
+
+        return info
+
     # Start a round of FL
+    client.numpy_client.post_model = post_model
     start_client()
-    client.numpy_client.evaluate(client.numpy_client.get_parameters())
 
-    # push weights learned locally
-    info = client_model_info(client)
-    invoke_chaincode(
-        FABRIC_CHANNEL,
-        CHAINCODE_CONTRACT,
-        CHAINCODE_CREATE_MODEL_FN,
-        [
-            f"model_{PORT}_{info['model_hash']}",
-            info["model_hash"],
-            PORT,
-            request.host_url,
-            round,
-            client.numpy_client.last_acc,
-        ],
-        port=CLIENT_PORT,
-    )
-
-    return info
+    return client.numpy_client.checkpoint_info
 
 
 @app.route("/model")

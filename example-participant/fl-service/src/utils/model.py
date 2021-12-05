@@ -42,8 +42,8 @@ def client_model_info(client: NumPyClientWrapper):
     parameters_res = client.get_parameters()
     return {
         **model_info(parameters_res),
-        "last_acc": client.numpy_client.last_acc,
-        "highest_acc": client.numpy_client.highest_acc,
+        "last_acc": client.numpy_client.checkpoint_info["last_acc"],
+        "highest_acc": client.numpy_client.checkpoint_info["highest_acc"],
     }
 
 

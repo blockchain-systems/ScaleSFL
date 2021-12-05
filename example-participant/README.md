@@ -46,7 +46,13 @@ python manager.py
 
 This service uses an express API to allow the client to interface with the blockchain network using the Fabric SDK.
 
-To run this, use
+To run this, first install the dependencies
+
+```sh
+npm install
+```
+
+Then you can run it using
 
 ```sh
 npm run start

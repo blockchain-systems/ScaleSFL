@@ -1,5 +1,6 @@
 import os
 import time
+import glob
 import argparse
 import grequests
 import threading
@@ -66,17 +67,7 @@ def start_round():
     time.sleep(2)
 
     reqs = []
-    for idx, client in enumerate(clients):
-        if (
-            client["fabric_client_url"] is None
-            or client["fabric_client_process"] is None
-        ):
-            (
-                client["fabric_client_process"],
-                client["fabric_client_url"],
-            ) = create_fabric_client(args.port + idx + 2000)
-            print(f"Creating Fabric Client {idx}: {client['fabric_client_url']}")
-
+    for client in clients:
         reqs.append(
             grequests.get(
                 f"{client['app_client_url']}/round/start", params={"round": round}
@@ -84,7 +75,7 @@ def start_round():
         )
 
     ress = grequests.map(reqs)
-    for res in ress:
+    for idx, res in enumerate(ress):
         client_info = res.json()
         print(f"FL Client {idx}: acc {client_info['last_acc']}")
 
@@ -95,6 +86,7 @@ def start_round():
 START_FL = "start-fl"
 GET_MODELS = "get-models"
 GET_SHARDS = "get-shards"
+DELETE_MODEL_CHECKPOINT = "delete-model-checkpoint"
 
 # local
 clients = []
@@ -110,12 +102,15 @@ if __name__ == "__main__":
             fl_ps, fl_url = create_fl_client(args.port + idx)
             print(f"Creating FL Client {idx}: {fl_url}")
 
+            fabric_ps, fabric_url = create_fabric_client(args.port + idx + 2000)
+            print(f"Creating Fabric Client {idx}: {fabric_url}")
+
             clients.append(
                 {
                     "app_client_url": fl_url,
                     "app_client_process": fl_ps,
-                    "fabric_client_url": None,
-                    "fabric_client_process": None,
+                    "fabric_client_url": fabric_url,
+                    "fabric_client_process": fabric_ps,
                 }
             )
 
@@ -126,6 +121,7 @@ if __name__ == "__main__":
                 Choice(START_FL, name="Start FL Round"),
                 Choice(GET_MODELS, name="Query All Models (shard1)"),
                 Choice(GET_SHARDS, name="Query All Shards (catalyst)"),
+                Choice(DELETE_MODEL_CHECKPOINT, name="Delete Model Checkpoints"),
                 Choice(value=None, name="Exit"),
             ],
             default=START_FL,
@@ -137,6 +133,18 @@ if __name__ == "__main__":
                 print(query_chaincode("shard1", "models", "GetAllModels", []))
             elif action == GET_SHARDS:
                 print(query_chaincode("mainline", "catalyst", "GetAllShards", []))
+            elif action == DELETE_MODEL_CHECKPOINT:
+                model_files = glob.glob("model/*.pkl", recursive=True)
+                if not model_files:
+                    print("No checkpoints to delete!")
+                else:
+                    for model_chkpt in model_files:
+                        proceed = inquirer.confirm(
+                            message=f"Delete file {model_chkpt}?", default=True
+                        ).execute()
+                        if proceed:
+                            os.remove(model_chkpt)
+
     except Exception as e:
         print(f"manager.py Error: {e}")
     finally:

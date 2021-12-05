@@ -1,8 +1,9 @@
-from collections import OrderedDict
-from logging import INFO, log
+import typing
 import warnings
+from logging import INFO, log
 import flwr as fl
 from flwr.client.numpy_client import NumPyClientWrapper
+from requests.api import post
 
 from .models.simple_cnn import create_model, train, test
 from .utils.model import get_parameters, set_parameters
@@ -13,6 +14,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 # TODO: add opacus to make clients DP
+# TODO: client needs to be thread safe?
 def client_pipline():
     """Create model, load data, define Flower client, start Flower client."""
 
@@ -24,10 +26,15 @@ def client_pipline():
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):
-        def __init__(self, *args, **kwargs):
+        def __init__(
+            self,
+            *args,
+            post_model: typing.Callable[[], typing.Dict] = None,
+            **kwargs,
+        ):
             super().__init__(*args, **kwargs)
-            self.highest_acc = 0
-            self.last_acc = 0
+            self.post_model = post_model
+            self.checkpoint_info = {"highest_acc": 0, "last_acc": 0}
 
         def get_parameters(self):
             return get_parameters(net)
@@ -35,16 +42,22 @@ def client_pipline():
         def set_parameters(self, parameters):
             set_parameters(net, parameters)
 
-        def fit(self, parameters, config):
+        def fit(self, parameters, config={}):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
+            if self.post_model is not None:
+                model_info = self.post_model()
+                if model_info is not None:
+                    self.checkpoint_info = {**self.checkpoint_info, **model_info}
             return self.get_parameters(), len(trainloader), {}
 
         def evaluate(self, parameters, config={}):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            self.last_acc = accuracy
-            self.highest_acc = max(self.highest_acc, accuracy)
+            self.checkpoint_info["last_acc"] = accuracy
+            self.checkpoint_info["highest_acc"] = max(
+                self.checkpoint_info["highest_acc"], accuracy
+            )
             log(INFO, f"accuracy: {accuracy}")
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
