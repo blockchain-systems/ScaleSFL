@@ -1,9 +1,11 @@
+import numpy as np
 from typing import List, Tuple
-import flwr as fl
 from flwr.common import EvaluateRes, FitRes, Parameters
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
+
+from ..utils.model import save_model
 
 
 class CommitteeStrategy(FedAvg):
@@ -18,7 +20,13 @@ class CommitteeStrategy(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ):
-        return super().aggregate_fit(rnd, results, failures)
+        parameters, config = super().aggregate_fit(rnd, results, failures)
+        if parameters is not None:
+            # Save aggregated_weights
+            print(f"Saving round {rnd} parameters...")
+            save_model(parameters)
+
+        return parameters, config
 
     def configure_evaluate(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager

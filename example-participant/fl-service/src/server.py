@@ -1,8 +1,8 @@
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 import flwr as fl
 
 from .strategies.committee_strategy import CommitteeStrategy
-from .utils.model import set_parameters
+from .utils.model import set_parameters, load_model
 from .utils.dataset import load_CIFAR10
 from .models.simple_cnn import create_model, test
 
@@ -26,7 +26,11 @@ def get_eval_fn():
     return evaluate
 
 
-if __name__ == "__main__":
+def server_pipline(config: Dict[str, int] = {}):
+    """Create strategy, start Flower server."""
+
+    parameters = load_model()
+
     # Define strategy
     strategy = CommitteeStrategy(
         fraction_fit=1,
@@ -35,11 +39,17 @@ if __name__ == "__main__":
         min_eval_clients=2,
         min_available_clients=2,
         eval_fn=get_eval_fn(),
+        initial_parameters=parameters,
     )
 
-    # Start server
-    fl.server.start_server(
+    # Start client
+    return strategy, lambda: fl.server.start_server(
         server_address="localhost:8080",
-        config={"num_rounds": 3},
+        config={"num_rounds": 3, **config},
         strategy=strategy,
     )
+
+
+if __name__ == "__main__":
+    _, start_server = server_pipline()
+    start_server()

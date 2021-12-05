@@ -12,6 +12,7 @@ from .utils.dataset import load_CIFAR10
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
+# TODO: add opacus to make clients DP
 def client_pipline():
     """Create model, load data, define Flower client, start Flower client."""
 
@@ -26,6 +27,7 @@ def client_pipline():
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.highest_acc = 0
+            self.last_acc = 0
 
         def get_parameters(self):
             return get_parameters(net)
@@ -38,9 +40,10 @@ def client_pipline():
             train(net, trainloader, epochs=1)
             return self.get_parameters(), len(trainloader), {}
 
-        def evaluate(self, parameters, config):
+        def evaluate(self, parameters, config={}):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
+            self.last_acc = accuracy
             self.highest_acc = max(self.highest_acc, accuracy)
             log(INFO, f"accuracy: {accuracy}")
             return float(loss), len(testloader), {"accuracy": float(accuracy)}

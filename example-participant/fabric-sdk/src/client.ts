@@ -12,8 +12,6 @@ export class Client {
     private lastChaincodeId: string | undefined;
     private _contract: Contract | undefined;
 
-    public constructor() {}
-
     public async connect(
         connectionProfile: Record<string, unknown>,
         gatewayOptions: GatewayOptions

@@ -7,21 +7,51 @@ import requests
 import threading
 from flask import Flask
 from flask import request, abort
-from InquirerPy import inquirer
-from InquirerPy.base.control import Choice
 
 from src.client import client_pipline
 from src.utils.model import client_model_info, deserialize_model, model_info
 from src.utils.endorsement import endorse_model
-from src.fabric.chaincode import invoke_chaincode, query_chaincode
+from src.fabric.chaincode import invoke_chaincode
 
-PORT = os.environ.get("PORT") or 3000
+PORT = int(os.environ.get("PORT") or 3000)
+CLIENT_PORT = int(os.environ.get("CLIENT_PORT") or PORT) + 2000
+FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL") or "shard1"
+CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT") or "models"
+CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN") or "CreateModel"
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
     return "Hello World!"
+
+
+@app.route("/round/start")
+def start_fl():
+    round = request.args.get("round")
+
+    # Start a round of FL
+    start_client()
+    client.numpy_client.evaluate(client.numpy_client.get_parameters())
+
+    # push weights learned locally
+    info = client_model_info(client)
+    invoke_chaincode(
+        FABRIC_CHANNEL,
+        CHAINCODE_CONTRACT,
+        CHAINCODE_CREATE_MODEL_FN,
+        [
+            f"model_{PORT}_{info['model_hash']}",
+            info["model_hash"],
+            PORT,
+            request.host_url,
+            round,
+            client.numpy_client.last_acc,
+        ],
+        port=CLIENT_PORT,
+    )
+
+    return info
 
 
 @app.route("/model")
@@ -31,6 +61,8 @@ def model():
     return {
         "model_hash": info["model_hash"],
         "serialized_model": info["serialized_model"],
+        "last_acc": info["last_acc"],
+        "highest_acc": info["highest_acc"],
     }
 
 
@@ -65,7 +97,7 @@ def evaluate_rwset():
                 _, bc_model = write["key"], json.loads(base64.decode(write["value"]))
 
                 res = requests.get(f"{bc_model.Server}/model").json()
-                serialized_model = res["serialized_model"]
+                serialized_model = bytes.fromhex(res["serialized_model"])
                 model_hash = res["model_hash"]
 
                 parameters_res = deserialize_model(serialized_model)
@@ -84,25 +116,9 @@ def evaluate_rwset():
     return {"status": 200}, 200
 
 
-# actions
-START_FL = "start-fl"
-
-
 if __name__ == "__main__":
-    # Start Flask
-    flask_thread = threading.Thread(target=lambda: app.run(host="0.0.0.0", port=PORT))
-    flask_thread.setDaemon(True)
-    flask_thread.start()
-
     # Start flower
-    while action := inquirer.select(
-        message="What's next?",
-        choices=[
-            Choice(START_FL, name="Start FL Round"),
-            Choice(value=None, name="Exit"),
-        ],
-        default=START_FL,
-    ).execute():
-        if action == START_FL:
-            client, start_client = client_pipline()
-            start_client()
+    client, start_client = client_pipline()
+
+    # Start Flask
+    app.run(host="0.0.0.0", port=PORT)

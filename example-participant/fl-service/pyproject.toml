@@ -11,6 +11,7 @@ flwr = "^0.17.0"
 seaborn = "^0.11.2"
 requests = "^2.26.0"
 inquirerpy = "^0.3.0"
+grequests = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 ipykernel = "^6.5.1"

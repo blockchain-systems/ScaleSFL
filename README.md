@@ -128,7 +128,7 @@ peer chaincode invoke \
 Now query the chaincode, we'll get all shards using
 
 ```sh
-peer chaincode query -C mainline -n catalyst -c '{"Args":["GetAllShardss"]}'
+peer chaincode query -C mainline -n catalyst -c '{"Args":["GetAllShards"]}'
 ```
 
 ---

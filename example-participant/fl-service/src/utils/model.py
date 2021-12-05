@@ -1,9 +1,11 @@
+import os
 import torch
+import pickle
 import hashlib
 from collections import OrderedDict
 from flwr.client.numpy_client import NumPyClientWrapper
-from flwr.common import serde
-from flwr.common import ParametersRes
+from flwr.common import Parameters, ParametersRes, serde
+from torchvision.datasets import cifar
 
 
 def get_parameters(model):
@@ -32,10 +34,28 @@ def model_info(parameters_res: ParametersRes):
 
     return {
         "model_hash": hashlib.sha256(serialized_model).hexdigest(),
-        "serialized_model": serialized_model,
+        "serialized_model": serialized_model.hex(),
     }
 
 
 def client_model_info(client: NumPyClientWrapper):
     parameters_res = client.get_parameters()
-    return model_info(parameters_res)
+    return {
+        **model_info(parameters_res),
+        "last_acc": client.numpy_client.last_acc,
+        "highest_acc": client.numpy_client.highest_acc,
+    }
+
+
+def save_model(parameters: Parameters, file="model/latest-weights.pkl"):
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    with open(file, "wb") as file:
+        pickle.dump(parameters, file)
+
+
+def load_model(file="model/latest-weights.pkl") -> Parameters:
+    try:
+        with open(file, "rb") as file:
+            return pickle.load(file)
+    except IOError:
+        return None
