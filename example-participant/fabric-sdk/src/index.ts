@@ -62,12 +62,18 @@ const main = async () => {
     const client = new Client();
     const connectionProfile = await getConnectionProfile(CONNECTION_PROFILE_ORG1);
     const caClient = buildCAClient(connectionProfile, ORG1_HOSTNAME);
-    const wallet = await createWallet();
+    const wallet = await createWallet(expressPort.toString());
     await enrollAdmin(caClient, wallet, MSP_ORG_1);
-    await registerAndEnrollUser(caClient, wallet, MSP_ORG_1, USER_ID, USER_AFFILIATION);
+    await registerAndEnrollUser(
+        caClient,
+        wallet,
+        MSP_ORG_1,
+        `${USER_ID}${expressPort}`,
+        USER_AFFILIATION
+    );
     client.connect(connectionProfile, {
         wallet,
-        identity: USER_ID,
+        identity: `${USER_ID}${expressPort}`,
         discovery: { enabled: true }
     });
 

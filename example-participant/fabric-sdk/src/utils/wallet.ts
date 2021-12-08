@@ -2,8 +2,11 @@ import FabricCAServices from "fabric-ca-client";
 import { Wallet, Wallets } from "fabric-network";
 import { ADMIN_USER_ID, ADMIN_USER_PASSWORD, WALLET_DIRECTORY_PATH } from "../constants";
 
-export const createWallet = async (walletDirectoryPath: string = WALLET_DIRECTORY_PATH) => {
-    return await Wallets.newFileSystemWallet(walletDirectoryPath);
+export const createWallet = async (
+    clientId: string,
+    walletDirectoryPath: string = WALLET_DIRECTORY_PATH
+) => {
+    return await Wallets.newFileSystemWallet(`${walletDirectoryPath}/${clientId}`);
 };
 
 export const enrollAdmin = async (caClient: FabricCAServices, wallet: Wallet, orgMspId: string) => {
