@@ -47,23 +47,23 @@ class CommitteeStrategy(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
         # Convert results
-        # endorsed_results = list(
-        #     filter(
-        #         lambda result: query_chaincode(
-        #             self.fabric_channel,
-        #             self.chaincode_contract,
-        #             self.chaincode_model_exists_fn,
-        #             [f"model_{model_info(result[1])['model_hash']}"],
-        #             port=self.client_port,
-        #         ),
-        #         results,
-        #     )
-        # )
-        if not results:
+        endorsed_results = list(
+            filter(
+                lambda result: query_chaincode(
+                    self.fabric_channel,
+                    self.chaincode_contract,
+                    self.chaincode_model_exists_fn,
+                    [f"model_{model_info(result[1])['model_hash']}"],
+                    port=self.client_port,
+                ),
+                results,
+            )
+        )
+        if not endorsed_results:
             return None, {}
         weights_results = [
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
-            for _, fit_res in results
+            for _, fit_res in endorsed_results
         ]
         parameters = weights_to_parameters(aggregate(weights_results))
 

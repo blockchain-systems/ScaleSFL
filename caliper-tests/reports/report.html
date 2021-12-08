@@ -152,7 +152,7 @@
                     </tr>
 
                     <tr>
-                         <td>Create models simuating participant training</td> <td>172</td> <td>346</td> <td>17.5</td> <td>0.68</td> <td>0.05</td> <td>0.37</td> <td>17.4</td>
+                         <td>Create models simuating participant training</td> <td>68</td> <td>0</td> <td>2.3</td> <td>2.10</td> <td>0.09</td> <td>1.65</td> <td>2.1</td>
                     </tr>
                 </table>
             </div>
@@ -163,7 +163,7 @@
 rateControl:
   type: fixed-load
   opts:
-    transactionLoad: 5
+    transactionLoad: 3
 </pre>
                         <h3>Performance metrics for Create models simuating participant training</h3>
                             <table style="min-width: 100%;">
@@ -171,7 +171,7 @@ rateControl:
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Create models simuating participant training</td> <td>172</td> <td>346</td> <td>17.5</td> <td>0.68</td> <td>0.05</td> <td>0.37</td> <td>17.4</td>
+                                     <td>Create models simuating participant training</td> <td>68</td> <td>0</td> <td>2.3</td> <td>2.10</td> <td>0.09</td> <td>1.65</td> <td>2.1</td>
                                 </tr>
                             </table>
                         <h3>Resource utilization for Create models simuating participant training</h3>
@@ -182,14 +182,14 @@ rateControl:
                 <h3>benchmark config</h3>
                 <pre id="benchmarkInfo" style="overflow: visible;white-space: pre-wrap;max-height:100%;">workers:
   type: local
-  number: 3
+  number: 2
 rounds:
   - label: Create models simuating participant training
     txDuration: 30
     rateControl:
       type: fixed-load
       opts:
-        transactionLoad: 5
+        transactionLoad: 3
     workload:
       module: workload&#x2F;createModel.js
       arguments:

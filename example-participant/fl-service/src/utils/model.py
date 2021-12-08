@@ -5,7 +5,6 @@ import hashlib
 from collections import OrderedDict
 from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.common import Parameters, ParametersRes, serde
-from torchvision.datasets import cifar
 
 
 def get_parameters(model):

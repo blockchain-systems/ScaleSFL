@@ -2,6 +2,7 @@ import os
 import re
 import json
 import base64
+import warnings
 import requests
 from flask import Flask
 from flask import request, abort
@@ -11,11 +12,13 @@ from src.utils.model import client_model_info, deserialize_model, model_info
 from src.utils.endorsement import endorse_model
 from src.fabric.chaincode import invoke_chaincode
 
-PORT = int(os.environ.get("PORT") or 3000)
-CLIENT_PORT = int(os.environ.get("CLIENT_PORT") or PORT) + 2000
-FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL") or "shard1"
-CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT") or "models"
-CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN") or "CreateModel"
+PORT = int(os.environ.get("PORT", 3000))
+CLIENT_PORT = int(os.environ.get("CLIENT_PORT", PORT)) + 2000
+FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL", "shard1")
+CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models")
+CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN", "CreateModel")
+
+TEST_COMPARE_MODEL_HASH = os.environ.get("TEST_COMPARE_MODEL_HASH", True)
 app = Flask(__name__)
 
 
@@ -108,7 +111,7 @@ def evaluate_rwset():
                 info = model_info(parameters_res)
 
                 # check if the claimed hash matches the actual from parameters
-                if model_hash != info["model_hash"]:
+                if TEST_COMPARE_MODEL_HASH and model_hash != info["model_hash"]:
                     abort(418)  # if not tell them they cant have coffee
 
                 # check if model is good
@@ -120,6 +123,11 @@ def evaluate_rwset():
 
 
 if __name__ == "__main__":
+    if not TEST_COMPARE_MODEL_HASH:
+        warnings.warn(
+            f"Env varialbe 'TEST_COMPARE_MODEL_HASH', is set to {TEST_COMPARE_MODEL_HASH}, Only use this during testing"
+        )
+
     # Start flower
     client, start_client = client_pipline()
 

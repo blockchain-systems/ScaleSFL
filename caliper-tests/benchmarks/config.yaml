@@ -1,14 +1,14 @@
 test:
     workers:
         type: local
-        number: 3
+        number: 2
     rounds:
         - label: Create models simuating participant training
           txDuration: 30
           rateControl:
               type: fixed-load
               opts:
-                  transactionLoad: 5
+                  transactionLoad: 3
           workload:
               module: workload/createModel.js
               arguments:
