@@ -35,8 +35,8 @@ def create_fl_client(port: int):
     app_client = subprocess.Popen(
         ["python", "app.py"],
         env=env_vars,
-        # stdout=subprocess.DEVNULL,
-        # stderr=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
     return app_client, f"http://localhost:{env_vars['PORT']}"
@@ -49,8 +49,8 @@ def create_fabric_client(port: int):
         ["npm", "run", "start"],
         env=env_vars,
         cwd=os.path.join(os.getcwd(), "../fabric-sdk"),
-        # stdout=subprocess.DEVNULL,
-        # stderr=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
     return fabric_client, f"http://localhost:{env_vars['PORT']}"
