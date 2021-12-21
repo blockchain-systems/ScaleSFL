@@ -3,13 +3,19 @@ test:
         type: local
         number: 2
     rounds:
-        - label: Create models simuating participant training
+        - label: Create models simuating participant shard1 training
           txDuration: 30
-          rateControl:
+          rateControl: &rateControl
               type: fixed-load
               opts:
                   transactionLoad: 3
           workload:
               module: workload/createModel.js
-              arguments:
+              arguments: &arguments
                   contractId: models
+        - label: Create models simuating participant shard2 training
+          txDuration: 30
+          rateControl: *rateControl
+          workload:
+              module: workload/createModel.js
+              arguments: *arguments

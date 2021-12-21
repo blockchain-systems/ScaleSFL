@@ -22,7 +22,7 @@ cd test-network
 
 ### Running the network
 
-This project relies on several componenets to test. The first step is to bring up the test network to bring up the Fabric blockchain. This is based n the test-network provided by [fabric-samples](https://github.com/hyperledger/fabric-samples)
+This project relies on several componenets to test. The first step is to bring up the test network to bring up the Fabric blockchain. This is based on the test-network provided by [fabric-samples](https://github.com/hyperledger/fabric-samples)
 
 ```sh
 ./network.sh down # remove any containers from previous runs (optional)
