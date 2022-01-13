@@ -3,12 +3,13 @@ import re
 import json
 import base64
 import warnings
+
 import requests
 from flask import Flask
 from flask import request, abort
 
 from src.client import client_pipline
-from src.utils.model import client_model_info, deserialize_model, model_info
+from src.models.utils import client_model_info, deserialize_model, model_info
 from src.utils.endorsement import endorse_model
 from src.fabric.chaincode import invoke_chaincode
 

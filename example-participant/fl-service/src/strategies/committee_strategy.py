@@ -11,7 +11,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
-from ..utils.model import save_model, model_info
+from ..models.utils import save_model, model_info
 from ..fabric.chaincode import query_chaincode
 
 

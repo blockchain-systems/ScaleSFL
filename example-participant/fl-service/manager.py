@@ -2,9 +2,10 @@ import os
 import time
 import glob
 import argparse
-import grequests
 import threading
 import subprocess
+
+import grequests
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 

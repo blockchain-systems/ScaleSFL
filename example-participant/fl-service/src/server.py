@@ -1,10 +1,11 @@
 from typing import Dict, Optional, Tuple
 import flwr as fl
 
-from .strategies.committee_strategy import CommitteeStrategy
-from .utils.model import set_parameters, load_model
-from .utils.dataset import load_CIFAR10
-from .models.simple_cnn import create_model, test
+from .strategies import CommitteeStrategy
+from .models.utils import set_parameters, load_model
+from .datasets import load_CIFAR10
+from .models.simple_cnn import create_model
+from .models.evaluation.train_cls import test
 
 
 def get_eval_fn():

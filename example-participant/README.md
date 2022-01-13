@@ -10,7 +10,7 @@ We also make use of the [Fabric SDK](https://hyperledger.github.io/fabric-sdk-no
 
 ### Federated Learning Service
 
-First make sure you have the required version of python installed (^3.9), and install poetry
+First make sure you have the required version of python installed (^3.9), and install [Poetry](https://python-poetry.org)
 
 ```sh
 pip install poetry --user
@@ -22,12 +22,12 @@ Next we'll install the required dependencies for this project
 poetry install
 ```
 
-Since PyTorch is dependent on system, please install a version of [PyTorch](https://pytorch.org/get-started/locally/) (if no supported GPU, make sure to install CPU)
+Since PyTorch is dependent on system, please install a version of [PyTorch](https://pytorch.org/get-started/locally/) (if no supported GPU, make sure to install CPU). We'll also install [Opacus](https://opacus.ai/), for differential privacy.
 
 e.g. for Linux with CUDA 10.2:
 
 ```sh
-pip3 install torch torchvision torchaudio
+pip3 install torch torchvision torchaudio opacus
 ```
 
 If a requirements.txt file is needed, you can generate it with:
