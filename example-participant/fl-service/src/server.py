@@ -3,7 +3,7 @@ import flwr as fl
 
 from .strategies import CommitteeStrategy
 from .models.utils import set_parameters, load_model
-from .datasets import load_CIFAR10
+from .datasets import cifar10_test
 from .models.simple_cnn import create_model
 from .models.evaluation.train_cls import test
 
@@ -15,7 +15,7 @@ def get_eval_fn():
     net = create_model()
 
     # Use the last 5k training examples as a validation set
-    _, testloader = load_CIFAR10()
+    testloader = cifar10_test()
 
     # The `evaluate` function will be called after every round
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:

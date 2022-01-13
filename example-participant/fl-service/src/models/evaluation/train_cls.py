@@ -1,9 +1,7 @@
 import torch
-from torch import nn
-import torch.nn.functional as F
 from opacus.privacy_engine import PrivacyEngine
 
-from ..utils import DEVICE
+from ..utils import get_device
 from ...utils.constants import (
     DEFAULT_LEARNING_RATE,
     DEFAULT_LOCAL_EPOCHS,
@@ -20,7 +18,7 @@ def train(
     lr=DEFAULT_LEARNING_RATE,
     momentum=DEFAULT_MOMENTUM,
     privacy_engine: PrivacyEngine = None,
-    device=DEVICE,
+    device=get_device(),
 ):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
@@ -59,7 +57,7 @@ def train(
     return loss_vals
 
 
-def test(net, testloader, device=DEVICE):
+def test(net, testloader, device=get_device()):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0

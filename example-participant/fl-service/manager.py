@@ -12,8 +12,7 @@ from InquirerPy.base.control import Choice
 from src.server import server_pipline
 from src.fabric.chaincode import query_chaincode
 
-parser = argparse.ArgumentParser(description="Run Github-Trends")
-
+parser = argparse.ArgumentParser(description="Run Federated Learning")
 parser.add_argument(
     "--participants",
     "-p",
@@ -21,7 +20,6 @@ parser.add_argument(
     help="Number of participants to launch",
     default=2,
 )
-
 parser.add_argument(
     "--port",
     type=int,
@@ -30,9 +28,11 @@ parser.add_argument(
 )
 
 
-def create_fl_client(port: int):
+def create_fl_client(port: int, client_id: int = 0, num_clients: int = 0):
     env_vars = os.environ.copy()
     env_vars["PORT"] = str(port)
+    env_vars["TEST_SIMULATE_CLIENT_ID"] = str(client_id)
+    env_vars["TEST_SIMULATE_CLIENTS_COUNT"] = str(num_clients)
     app_client = subprocess.Popen(
         ["python", "app.py"],
         env=env_vars,
@@ -117,7 +117,9 @@ if __name__ == "__main__":
     try:
         # Start Clients
         for idx in range(args.participants):
-            fl_ps, fl_url = create_fl_client(args.port + idx)
+            fl_ps, fl_url = create_fl_client(
+                port=args.port + idx, client_id=idx, num_clients=args.participants
+            )
             print(f"Creating FL Client {idx}: {fl_url}")
 
             clients.append(

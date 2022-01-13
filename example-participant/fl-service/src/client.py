@@ -8,7 +8,7 @@ from opacus import PrivacyEngine
 from .models.simple_cnn import create_model
 from .models.evaluation.train_cls import train, test
 from .models.utils import get_parameters, set_parameters
-from .datasets import load_CIFAR10
+from .datasets import cifar10_noniid
 from .utils.constants import DEFAULT_LOCAL_EPOCHS, PRIVACY_TARGET_DELTA
 
 
@@ -17,14 +17,16 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # TODO: add opacus to make clients DP
 # TODO: client needs to be thread safe?
-def client_pipline():
+def client_pipline(client_id: int = 0, num_clients: int = 0):
     """Create model, load data, define Flower client, start Flower client."""
 
     # Load model
     net = create_model()
 
     # Load data (CIFAR-10)
-    trainloader, testloader = load_CIFAR10()
+    trainloader, testloader = cifar10_noniid(
+        client_id=client_id, num_clients=num_clients
+    )
 
     # Flower client
     class CifarClient(fl.client.NumPyClient):

@@ -20,6 +20,8 @@ CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models")
 CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN", "CreateModel")
 
 TEST_COMPARE_MODEL_HASH = os.environ.get("TEST_COMPARE_MODEL_HASH", True)
+TEST_SIMULATE_CLIENT_ID = int(os.environ.get("TEST_SIMULATE_CLIENT_ID", 0))
+TEST_SIMULATE_CLIENTS_COUNT = int(os.environ.get("TEST_SIMULATE_CLIENTS_COUNT", 0))
 app = Flask(__name__)
 
 
@@ -130,7 +132,9 @@ if __name__ == "__main__":
         )
 
     # Start flower
-    client, start_client = client_pipline()
+    client, start_client = client_pipline(
+        client_id=TEST_SIMULATE_CLIENT_ID, num_clients=TEST_SIMULATE_CLIENTS_COUNT
+    )
 
     # Start Flask
     app.run(host="0.0.0.0", port=PORT)
