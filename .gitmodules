@@ -1,0 +1,3 @@
+[submodule "example-participant/fl-service/src/datasets/leaf"]
+	path = example-participant/fl-service/src/datasets/leaf
+	url = https://github.com/TalwalkarLab/leaf

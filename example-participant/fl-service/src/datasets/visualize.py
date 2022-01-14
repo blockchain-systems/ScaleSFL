@@ -30,19 +30,38 @@ FASHION_MNIST_CLASSES = [
 ]
 
 
+def show_images(
+    data_loader,
+    channels=3,
+    img_size=32,
+    num_samples=6,
+):
+    xs, ys = iter(data_loader).next()
+    num_samples = min(len(xs), num_samples)
+
+    _, axs = plt.subplots(1, num_samples, figsize=(6 * num_samples, 8))
+    for i in range(num_samples):
+        ax = axs[i]
+        ax.set_xticks([]), ax.set_yticks([])
+        ax.imshow(
+            np.transpose(xs[i].reshape((channels, img_size, img_size)), (1, 2, 0))
+        )
+
+
 def show_predictions(
     model,
-    test_loader,
+    data_loader,
     channels=3,
     img_size=32,
     num_samples=6,
     labels=None,
     device=get_device(),
 ):
-    xs, ys = iter(test_loader).next()
+    xs, ys = iter(data_loader).next()
     preds = model(xs.to(device)).detach().cpu()
+    num_samples = min(len(xs), num_samples)
 
-    _, axs = plt.subplots(1, num_samples, figsize=(24, 8))
+    _, axs = plt.subplots(1, num_samples, figsize=(6 * num_samples, 8))
     for i in range(num_samples):
         ax = axs[i]
         ax.set_xticks([]), ax.set_yticks([])

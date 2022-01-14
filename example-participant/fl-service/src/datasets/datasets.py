@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader, Subset, random_split
 from torchvision.datasets import CIFAR10, MNIST
 
+from .utils.leaf import FEMNIST
 from ..utils.constants import (
     CIFAR10_SHARDS,
     DEFAULT_BATCH_SIZE,
@@ -21,6 +22,7 @@ transform_cifar10 = transforms.Compose(
 transform_mnist = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
 )
+transform_leaf_femnist = transforms.Compose([transforms.ToTensor()])
 
 
 def dataset_iid(
@@ -167,3 +169,27 @@ def mnist_test(batch_size: int = DEFAULT_BATCH_SIZE):
     testloader = DataLoader(testset, batch_size=batch_size)
 
     return testloader
+
+
+def leaf_femnist_noniid(
+    client_id: int = 0, num_clients: int = 0, batch_size: int = DEFAULT_BATCH_SIZE
+):
+    """Load non-IID Leaf's FEMNIST (training and test set)."""
+    trainset = FEMNIST(
+        "./src/datasets/leaf/data/femnist/data",
+        client_id=client_id,
+        train=True,
+        transform=transform_leaf_femnist,
+    )
+    testset = FEMNIST(
+        "./src/datasets/leaf/data/femnist/data",
+        client_id=client_id,
+        train=False,
+        transform=transform_leaf_femnist,
+    )
+
+    # Dataloaders
+    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
+    testloader = DataLoader(testset, batch_size=batch_size, shuffle=True)
+
+    return trainloader, testloader
