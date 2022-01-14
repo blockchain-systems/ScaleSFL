@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from .utils import get_device
 
@@ -33,5 +32,8 @@ class Net(nn.Module):
         return self.fc(x)
 
 
-def create_model(in_channels=3, dim_out=10, img_size=32, device=get_device()):
+def create_model(in_channels=3, dim_out=10, img_size=32, device=None):
+    if not device:
+        device = get_device()
+
     return Net(in_channels, dim_out, img_size).to(device)

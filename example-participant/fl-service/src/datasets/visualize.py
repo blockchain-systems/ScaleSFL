@@ -55,8 +55,11 @@ def show_predictions(
     img_size=32,
     num_samples=6,
     labels=None,
-    device=get_device(),
+    device=None,
 ):
+    if not device:
+        device = get_device()
+
     xs, ys = iter(data_loader).next()
     preds = model(xs.to(device)).detach().cpu()
     num_samples = min(len(xs), num_samples)

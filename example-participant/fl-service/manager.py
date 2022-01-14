@@ -26,38 +26,58 @@ parser.add_argument(
     help="Starting port to launch clients",
     default=3000,
 )
+parser.add_argument(
+    "--gpu",
+    action="store_true",
+    help="Use GPU if available",
+)
+parser.add_argument(
+    "--verbose",
+    "-v",
+    action="store_true",
+    help="Increases the verbosity of output. Enable for debug output",
+)
 
 
-def create_fl_client(port: int, client_id: int = 0, num_clients: int = 0):
+def create_fl_client(
+    port: int,
+    client_id: int = 0,
+    num_clients: int = 0,
+    use_gpu: bool = True,
+    verbose: bool = False,
+):
     env_vars = os.environ.copy()
     env_vars["PORT"] = str(port)
+    env_vars["CLIENT_USE_GPU"] = str(use_gpu)
     env_vars["TEST_SIMULATE_CLIENT_ID"] = str(client_id)
     env_vars["TEST_SIMULATE_CLIENTS_COUNT"] = str(num_clients)
-    app_client = subprocess.Popen(
-        ["python", "app.py"],
-        env=env_vars,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+
+    verbosity = (
+        {} if verbose else {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
     )
+    app_client = subprocess.Popen(["python", "app.py"], env=env_vars, **verbosity)
 
     return app_client, f"http://localhost:{env_vars['PORT']}"
 
 
-def create_fabric_client(port: int):
+def create_fabric_client(port: int, verbose: bool = False):
     env_vars = os.environ.copy()
     env_vars["PORT"] = str(port)
+
+    verbosity = (
+        {} if verbose else {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
+    )
     fabric_client = subprocess.Popen(
         ["npm", "run", "start"],
         env=env_vars,
         cwd=os.path.join(os.getcwd(), "../fabric-sdk"),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        **verbosity,
     )
 
     return fabric_client, f"http://localhost:{env_vars['PORT']}"
 
 
-def ensure_fabric_clients(port: int):
+def ensure_fabric_clients(port: int, verbose: bool = False):
     created_client = False
     for idx, client in enumerate(clients):
         if not client["fabric_client_url"]:
@@ -113,12 +133,17 @@ round = 0
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    os.environ["CLIENT_USE_GPU"] = str(args.gpu)
 
     try:
         # Start Clients
         for idx in range(args.participants):
             fl_ps, fl_url = create_fl_client(
-                port=args.port + idx, client_id=idx, num_clients=args.participants
+                port=args.port + idx,
+                client_id=idx,
+                num_clients=args.participants,
+                use_gpu=args.gpu,
+                verbose=args.verbose,
             )
             print(f"Creating FL Client {idx}: {fl_url}")
 
@@ -146,13 +171,13 @@ if __name__ == "__main__":
         ).execute():
             if action == START_FL:
                 round += 1
-                ensure_fabric_clients(args.port)
+                ensure_fabric_clients(args.port, verbose=args.verbose)
                 start_round()
             elif action == GET_MODELS:
-                ensure_fabric_clients(args.port)
+                ensure_fabric_clients(args.port, verbose=args.verbose)
                 print(query_chaincode("shard1", "models", "GetAllModels", []))
             elif action == GET_SHARDS:
-                ensure_fabric_clients(args.port)
+                ensure_fabric_clients(args.port, verbose=args.verbose)
                 print(query_chaincode("mainline", "catalyst", "GetAllShards", []))
             elif action == DELETE_MODEL_CHECKPOINT:
                 model_files = glob.glob("model/*.pkl", recursive=True)
@@ -166,7 +191,7 @@ if __name__ == "__main__":
                         if proceed:
                             os.remove(model_chkpt)
             elif action == DELETE_FABRIC_WALLET:
-                wallet_files = glob.glob("../fabric-sdk/wallet/*.id", recursive=True)
+                wallet_files = glob.glob("../fabric-sdk/wallet/**/*.id", recursive=True)
                 if not wallet_files:
                     print("No wallet IDs to delete!")
                 else:

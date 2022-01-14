@@ -18,9 +18,12 @@ def train(
     lr=DEFAULT_LEARNING_RATE,
     momentum=DEFAULT_MOMENTUM,
     privacy_engine: PrivacyEngine = None,
-    device=get_device(),
+    device=None,
 ):
     """Train the network on the training set."""
+    if not device:
+        device = get_device()
+
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum)
     loss_vals = []
@@ -57,8 +60,11 @@ def train(
     return loss_vals
 
 
-def test(net, testloader, device=get_device()):
+def test(net, testloader, device=None):
     """Validate the network on the entire test set."""
+    if not device:
+        device = get_device()
+
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()

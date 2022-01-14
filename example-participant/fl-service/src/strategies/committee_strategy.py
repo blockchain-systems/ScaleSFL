@@ -68,7 +68,7 @@ class CommitteeStrategy(FedAvg):
         parameters = weights_to_parameters(aggregate(weights_results))
 
         # Save aggregated_weights
-        if parameters is not None:
+        if parameters:
             print(f"Saving round {rnd} parameters...")
             save_model(parameters)
 

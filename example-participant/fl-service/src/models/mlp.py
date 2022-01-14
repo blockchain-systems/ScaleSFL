@@ -19,5 +19,8 @@ class Net(nn.Module):
         return self.fc(x)
 
 
-def create_model(dim_in=32 * 32 * 3, dim_hidden=128, dim_out=10, device=get_device()):
+def create_model(dim_in=32 * 32 * 3, dim_hidden=128, dim_out=10, device=None):
+    if not device:
+        device = get_device()
+
     return Net(dim_in, dim_hidden, dim_out).to(device)

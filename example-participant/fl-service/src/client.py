@@ -15,7 +15,6 @@ from .utils.constants import DEFAULT_LOCAL_EPOCHS, PRIVACY_TARGET_DELTA
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-# TODO: add opacus to make clients DP
 # TODO: client needs to be thread safe?
 def client_pipline(client_id: int = 0, num_clients: int = 0):
     """Create model, load data, define Flower client, start Flower client."""

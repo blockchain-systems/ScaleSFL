@@ -4,7 +4,7 @@ import morgan from "morgan";
 import { Client } from "./client";
 import {
     CONNECTION_PROFILE_ORG1,
-    MSP_ORG_1,
+    MSP_ORG1,
     ORG1_HOSTNAME,
     USER_AFFILIATION,
     USER_ID
@@ -63,11 +63,11 @@ const main = async () => {
     const connectionProfile = await getConnectionProfile(CONNECTION_PROFILE_ORG1);
     const caClient = buildCAClient(connectionProfile, ORG1_HOSTNAME);
     const wallet = await createWallet(expressPort.toString());
-    await enrollAdmin(caClient, wallet, MSP_ORG_1);
+    await enrollAdmin(caClient, wallet, MSP_ORG1);
     await registerAndEnrollUser(
         caClient,
         wallet,
-        MSP_ORG_1,
+        MSP_ORG1,
         `${USER_ID}${expressPort}`,
         USER_AFFILIATION
     );
