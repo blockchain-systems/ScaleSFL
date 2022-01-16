@@ -20,8 +20,8 @@ class CommitteeStrategy(FedAvg):
         self,
         *args,
         client_port: int = 5000,
-        fabric_channel: str = "shard1",
-        chaincode_contract: str = "models",
+        fabric_channel: str = "shard0",
+        chaincode_contract: str = "models0",
         chaincode_model_exists_fn: str = "ModelExists",
         **kwargs,
     ):

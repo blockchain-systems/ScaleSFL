@@ -11,6 +11,7 @@ from InquirerPy.base.control import Choice
 
 from src.server import server_pipline
 from src.fabric.chaincode import query_chaincode
+from src.utils import shard_balancers
 
 parser = argparse.ArgumentParser(description="Run Federated Learning")
 parser.add_argument(
@@ -18,6 +19,13 @@ parser.add_argument(
     "-p",
     type=int,
     help="Number of participants to launch",
+    default=2,
+)
+parser.add_argument(
+    "--shards",
+    "-s",
+    type=int,
+    help="Number of shards available",
     default=2,
 )
 parser.add_argument(
@@ -43,12 +51,18 @@ def create_fl_client(
     port: int,
     client_id: int = 0,
     num_clients: int = 0,
+    num_shards: int = 0,
     use_gpu: bool = True,
     verbose: bool = False,
 ):
+    # Obtain the shardId
+    shard_id = shard_balancers.round_robin(client_id, num_shards)
+
     env_vars = os.environ.copy()
     env_vars["PORT"] = str(port)
     env_vars["CLIENT_USE_GPU"] = str(use_gpu)
+    env_vars["FABRIC_CHANNEL"] = f"shard{shard_id}"
+    env_vars["CHAINCODE_CONTRACT"] = f"models{shard_id}"
     env_vars["TEST_SIMULATE_CLIENT_ID"] = str(client_id)
     env_vars["TEST_SIMULATE_CLIENTS_COUNT"] = str(num_clients)
 
@@ -81,7 +95,9 @@ def ensure_fabric_clients(port: int, verbose: bool = False):
     created_client = False
     for idx, client in enumerate(clients):
         if not client["fabric_client_url"]:
-            fabric_ps, fabric_url = create_fabric_client(port + idx + 2000)
+            fabric_ps, fabric_url = create_fabric_client(
+                port + idx + 2000, verbose=verbose
+            )
             print(f"Creating Fabric Client {idx}: {fabric_url}")
 
             client["fabric_client_url"] = fabric_url
@@ -93,9 +109,9 @@ def ensure_fabric_clients(port: int, verbose: bool = False):
         time.sleep(5)
 
 
-def start_round():
+def start_round(num_clients: int = 0):
     print(f"Starting FL round: {round}")
-    _, start_server = server_pipline()
+    _, start_server = server_pipline(num_clients=num_clients)
 
     fl_server_thread = threading.Thread(target=lambda: start_server())
     fl_server_thread.setDaemon(True)
@@ -142,6 +158,7 @@ if __name__ == "__main__":
                 port=args.port + idx,
                 client_id=idx,
                 num_clients=args.participants,
+                num_shards=args.shards,
                 use_gpu=args.gpu,
                 verbose=args.verbose,
             )
@@ -161,8 +178,11 @@ if __name__ == "__main__":
             message="What's next?",
             choices=[
                 Choice(START_FL, name="Start FL Round"),
-                Choice(GET_MODELS, name="Query All Models (shard1)"),
                 Choice(GET_SHARDS, name="Query All Shards (catalyst)"),
+                *[
+                    Choice(f"{GET_MODELS}{s}", name=f"Query All Models (shard{s})")
+                    for s in range(1, args.shards + 1)
+                ],
                 Choice(DELETE_MODEL_CHECKPOINT, name="Delete Model Checkpoints"),
                 Choice(DELETE_FABRIC_WALLET, name="Delete SDK Wallet IDs"),
                 Choice(value=None, name="Exit"),
@@ -172,10 +192,17 @@ if __name__ == "__main__":
             if action == START_FL:
                 round += 1
                 ensure_fabric_clients(args.port, verbose=args.verbose)
-                start_round()
-            elif action == GET_MODELS:
+                start_round(num_clients=args.participants)
+            elif action.startswith(GET_MODELS):
                 ensure_fabric_clients(args.port, verbose=args.verbose)
-                print(query_chaincode("shard1", "models", "GetAllModels", []))
+                print(
+                    query_chaincode(
+                        f"shard{action[len(GET_MODELS):]}",
+                        f"models{action[len(GET_MODELS):]}",
+                        "GetAllModels",
+                        [],
+                    )
+                )
             elif action == GET_SHARDS:
                 ensure_fabric_clients(args.port, verbose=args.verbose)
                 print(query_chaincode("mainline", "catalyst", "GetAllShards", []))

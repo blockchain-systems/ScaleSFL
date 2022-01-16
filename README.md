@@ -33,7 +33,7 @@ To create a channel we can use the following command
 
 ```sh
 ./network.sh createChannel -c mainline
-./network.sh createChannel -c shard1
+./network.sh createChannel -c shard0
 ```
 
 Next we'll deploy the model catalyst chaincode to in using
@@ -46,8 +46,8 @@ Next we'll deploy the model catalyst chaincode to in using
     -ccl typescript
 
 ./network.sh deployCC \
-    -c shard1 \
-    -ccn models \
+    -c shard0 \
+    -ccn models0 \
     -ccp ../chaincode/shard \
     -ccl typescript
 ```
@@ -85,6 +85,13 @@ export CORE_PEER_LOCALMSPID="Org2MSP"
 export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
 export CORE_PEER_ADDRESS=localhost:9051
+
+# Org3 env variables
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org3MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+export CORE_PEER_ADDRESS=localhost:11051
 ```
 
 We can check which channels a peer is in using
@@ -112,8 +119,8 @@ peer chaincode invoke \
 
 ```sh
 peer chaincode invoke \
-    -n models \
-    -C shard1 \
+    -n models0 \
+    -C shard0 \
     -o localhost:7050 \
     --tls \
     --ordererTLSHostnameOverride orderer.example.com \

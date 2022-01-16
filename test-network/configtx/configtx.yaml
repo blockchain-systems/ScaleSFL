@@ -13,90 +13,89 @@
 #
 ################################################################################
 Organizations:
-
     # SampleOrg defines an MSP using the sampleconfig.  It should never be used
     # in production but may be used as a template for other definitions
     - &OrdererOrg
-        # DefaultOrg defines the organization which is used in the sampleconfig
-        # of the fabric.git development environment
-        Name: OrdererOrg
+      # DefaultOrg defines the organization which is used in the sampleconfig
+      # of the fabric.git development environment
+      Name: OrdererOrg
 
-        # ID to load the MSP definition as
-        ID: OrdererMSP
+      # ID to load the MSP definition as
+      ID: OrdererMSP
 
-        # MSPDir is the filesystem path which contains the MSP configuration
-        MSPDir: ../organizations/ordererOrganizations/example.com/msp
+      # MSPDir is the filesystem path which contains the MSP configuration
+      MSPDir: ../organizations/ordererOrganizations/example.com/msp
 
-        # Policies defines the set of policies at this level of the config tree
-        # For organization policies, their canonical path is usually
-        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
-        Policies:
-            Readers:
-                Type: Signature
-                Rule: "OR('OrdererMSP.member')"
-            Writers:
-                Type: Signature
-                Rule: "OR('OrdererMSP.member')"
-            Admins:
-                Type: Signature
-                Rule: "OR('OrdererMSP.admin')"
+      # Policies defines the set of policies at this level of the config tree
+      # For organization policies, their canonical path is usually
+      #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+      Policies:
+          Readers:
+              Type: Signature
+              Rule: "OR('OrdererMSP.member')"
+          Writers:
+              Type: Signature
+              Rule: "OR('OrdererMSP.member')"
+          Admins:
+              Type: Signature
+              Rule: "OR('OrdererMSP.admin')"
 
-        OrdererEndpoints:
-            - orderer.example.com:7050
+      OrdererEndpoints:
+          - orderer.example.com:7050
 
     - &Org1
-        # DefaultOrg defines the organization which is used in the sampleconfig
-        # of the fabric.git development environment
-        Name: Org1MSP
+      # DefaultOrg defines the organization which is used in the sampleconfig
+      # of the fabric.git development environment
+      Name: Org1MSP
 
-        # ID to load the MSP definition as
-        ID: Org1MSP
+      # ID to load the MSP definition as
+      ID: Org1MSP
 
-        MSPDir: ../organizations/peerOrganizations/org1.example.com/msp
+      MSPDir: ../organizations/peerOrganizations/org1.example.com/msp
 
-        # Policies defines the set of policies at this level of the config tree
-        # For organization policies, their canonical path is usually
-        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
-        Policies:
-            Readers:
-                Type: Signature
-                Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
-            Writers:
-                Type: Signature
-                Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
-            Admins:
-                Type: Signature
-                Rule: "OR('Org1MSP.admin')"
-            Endorsement:
-                Type: Signature
-                Rule: "OR('Org1MSP.peer')"
+      # Policies defines the set of policies at this level of the config tree
+      # For organization policies, their canonical path is usually
+      #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+      Policies:
+          Readers:
+              Type: Signature
+              Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+          Writers:
+              Type: Signature
+              Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
+          Admins:
+              Type: Signature
+              Rule: "OR('Org1MSP.admin')"
+          Endorsement:
+              Type: Signature
+              Rule: "OR('Org1MSP.peer')"
 
     - &Org2
-        # DefaultOrg defines the organization which is used in the sampleconfig
-        # of the fabric.git development environment
-        Name: Org2MSP
+      # DefaultOrg defines the organization which is used in the sampleconfig
+      # of the fabric.git development environment
+      Name: Org2MSP
 
-        # ID to load the MSP definition as
-        ID: Org2MSP
+      # ID to load the MSP definition as
+      ID: Org2MSP
 
-        MSPDir: ../organizations/peerOrganizations/org2.example.com/msp
+      MSPDir: ../organizations/peerOrganizations/org2.example.com/msp
 
-        # Policies defines the set of policies at this level of the config tree
-        # For organization policies, their canonical path is usually
-        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
-        Policies:
-            Readers:
-                Type: Signature
-                Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
-            Writers:
-                Type: Signature
-                Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
-            Admins:
-                Type: Signature
-                Rule: "OR('Org2MSP.admin')"
-            Endorsement:
-                Type: Signature
-                Rule: "OR('Org2MSP.peer')"
+      # Policies defines the set of policies at this level of the config tree
+      # For organization policies, their canonical path is usually
+      #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+      Policies:
+          Readers:
+              Type: Signature
+              Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
+          Writers:
+              Type: Signature
+              Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
+          Admins:
+              Type: Signature
+              Rule: "OR('Org2MSP.admin')"
+          Endorsement:
+              Type: Signature
+              Rule: "OR('Org2MSP.peer')"
 
 ################################################################################
 #
@@ -163,7 +162,6 @@ Capabilities:
 #
 ################################################################################
 Application: &ApplicationDefaults
-
     # Organizations is the list of orgs which are defined as participants on
     # the application side of the network
     Organizations:
@@ -198,9 +196,7 @@ Application: &ApplicationDefaults
 #   genesis block for orderer related parameters
 #
 ################################################################################
-Orderer: &OrdererDefaults
-
-    # Orderer Type: The orderer implementation to start
+Orderer: &OrdererDefaults # Orderer Type: The orderer implementation to start
     OrdererType: etcdraft
     # Addresses used to be the list of orderer addresses that clients and peers
     # could connect to.  However, this does not allow clients to associate orderer
@@ -212,17 +208,16 @@ Orderer: &OrdererDefaults
 
     EtcdRaft:
         Consenters:
-        - Host: orderer.example.com
-          Port: 7050
-          ClientTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
-          ServerTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+            - Host: orderer.example.com
+              Port: 7050
+              ClientTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+              ServerTLSCert: ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
 
     # Batch Timeout: The amount of time to wait before creating a batch
     BatchTimeout: 2s
 
     # Batch Size: Controls the number of messages batched into a block
     BatchSize:
-
         # Max Message Count: The maximum number of messages to permit in a batch
         MaxMessageCount: 10
 
@@ -299,7 +294,6 @@ Channel: &ChannelDefaults
 #
 ################################################################################
 Profiles:
-
     TwoOrgsApplicationGenesis:
         <<: *ChannelDefaults
         Orderer:

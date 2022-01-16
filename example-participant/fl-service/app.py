@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import time
 import base64
 import warnings
 
@@ -15,11 +16,11 @@ from src.fabric.chaincode import invoke_chaincode
 
 PORT = int(os.environ.get("PORT", 3000))
 CLIENT_PORT = int(os.environ.get("CLIENT_PORT", PORT)) + 2000
-FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL", "shard1")
-CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models")
+FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL", "shard0")
+CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models0")
 CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN", "CreateModel")
 
-TEST_COMPARE_MODEL_HASH = os.environ.get("TEST_COMPARE_MODEL_HASH", True)
+TEST_SIMULATE_ENDORSE = os.environ.get("TEST_SIMULATE_ENDORSE", True)
 TEST_SIMULATE_CLIENT_ID = int(os.environ.get("TEST_SIMULATE_CLIENT_ID", 0))
 TEST_SIMULATE_CLIENTS_COUNT = int(os.environ.get("TEST_SIMULATE_CLIENTS_COUNT", 0))
 app = Flask(__name__)
@@ -101,11 +102,18 @@ def evaluate_rwset():
         ns = nsRwSet["NameSpace"]
         kvRwSet = nsRwSet["KvRwSet"]
         # Check if the contract being called is a shard, and it is being written to
-        if re.match("shard\d+", ns) and "writes" in kvRwSet:
+        if (
+            re.match("models\d+", ns)
+            and "writes" in kvRwSet
+            and ns == CHAINCODE_CONTRACT
+        ):
+            if TEST_SIMULATE_ENDORSE:
+                time.sleep(1.4)
+                return {"status": 200}, 200
             for write in kvRwSet["writes"]:
-                _, bc_model = write["key"], json.loads(base64.decode(write["value"]))
+                _, bc_model = write["key"], json.loads(base64.b64decode(write["value"]))
 
-                res = requests.get(f"{bc_model.Server}/model").json()
+                res = requests.get(f"{bc_model['Server']}/model").json()
                 serialized_model = bytes.fromhex(res["serialized_model"])
                 model_hash = res["model_hash"]
 
@@ -114,7 +122,7 @@ def evaluate_rwset():
                 info = model_info(parameters_res)
 
                 # check if the claimed hash matches the actual from parameters
-                if TEST_COMPARE_MODEL_HASH and model_hash != info["model_hash"]:
+                if model_hash != info["model_hash"]:
                     abort(418)  # if not tell them they cant have coffee
 
                 # check if model is good
@@ -126,9 +134,9 @@ def evaluate_rwset():
 
 
 if __name__ == "__main__":
-    if not TEST_COMPARE_MODEL_HASH:
+    if TEST_SIMULATE_ENDORSE:
         warnings.warn(
-            f"Env varialbe 'TEST_COMPARE_MODEL_HASH', is set to {TEST_COMPARE_MODEL_HASH}, Only use this during testing"
+            f"Env varialbe 'TEST_SIMULATE_ENDORSE', is set to {TEST_SIMULATE_ENDORSE}, Only use this during testing"
         )
 
     # Start flower

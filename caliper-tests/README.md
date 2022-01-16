@@ -25,8 +25,7 @@ cd networks/fabric/config_solo_raft
 Note: since we are using a CA, you may have to update the network file `networks/fabric-config.yaml` with the correct secret key path, e.g.
 
 ```sh
-ls -la ../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore
-ls -la ../test-network/organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore
+ls -la ../test-network/organizations/peerOrganizations/org*.example.com/users/User1@org*.example.com/msp/keystore
 ```
 
 ```sh

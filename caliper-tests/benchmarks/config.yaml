@@ -1,21 +1,30 @@
 test:
     workers:
         type: local
-        number: 2
+        number: 3
     rounds:
-        - label: Create models simuating participant shard1 training
+        - label: Create models simuating 1 shards training
           txDuration: 30
           rateControl: &rateControl
-              type: fixed-load
+              type: fixed-feedback-rate
               opts:
-                  transactionLoad: 3
+                  tps: 2
+                  transactionLoad: 2
           workload:
               module: workload/createModel.js
-              arguments: &arguments
-                  contractId: models
-        - label: Create models simuating participant shard2 training
+              arguments:
+                  contractIds: [models0]
+        - label: Create models simuating 2 shard training
           txDuration: 30
           rateControl: *rateControl
           workload:
               module: workload/createModel.js
-              arguments: *arguments
+              arguments:
+                  contractIds: [models0, models1]
+        - label: Create models simuating 3 shard training
+          txDuration: 30
+          rateControl: *rateControl
+          workload:
+              module: workload/createModel.js
+              arguments:
+                  contractIds: [models0, models1, models2]

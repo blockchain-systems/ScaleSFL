@@ -27,20 +27,22 @@ def get_eval_fn():
     return evaluate
 
 
-def server_pipline(config: Dict[str, int] = {}):
+def server_pipline(config: Dict[str, int] = {}, num_clients: int = 0):
     """Create strategy, start Flower server."""
 
     parameters = load_model()
 
     # Define strategy
     strategy = CommitteeStrategy(
-        fraction_fit=1,
-        fraction_eval=1,
-        min_fit_clients=2,
-        min_eval_clients=2,
-        min_available_clients=2,
+        fraction_fit=1.0,
+        fraction_eval=1.0,
+        min_fit_clients=num_clients,
+        min_eval_clients=num_clients,
+        min_available_clients=num_clients,
         eval_fn=get_eval_fn(),
         initial_parameters=parameters,
+        client_port=5000,
+        fabric_channel="shard0",
     )
 
     # Start client

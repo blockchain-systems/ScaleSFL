@@ -4,7 +4,8 @@ const { WorkloadModuleBase } = require("@hyperledger/caliper-core");
 const crypto = require("crypto");
 
 const TEST_MODEL_HASH = "";
-const TEST_CLIENT_SERVER = "http://192.168.1.170:3001";
+const TEST_CLIENT_SERVER = "http://192.168.1.170";
+const TEST_CLIENT_PORT_START = 3000;
 
 /**
  * Workload module for the benchmark round.
@@ -24,16 +25,19 @@ class CreateModelsWorkload extends WorkloadModuleBase {
         const modelHash =
             TEST_MODEL_HASH ||
             crypto.createHash("sha256").update(crypto.randomBytes(20)).digest("hex");
+        // const shardId = Math.floor(Math.random() * this.roundArguments.contractIds.length);
+        const shardId = this.txIndex % this.roundArguments.contractIds.length;
+        const contractId = this.roundArguments.contractIds[shardId];
 
         let args = {
-            contractId: this.roundArguments.contractId,
+            contractId: contractId,
             contractFunction: "CreateModel",
             invokerIdentity: "User1",
             contractArguments: [
                 `model_${modelHash}`, // ID
                 modelHash, // Hash
                 `worker${this.workerIndex}`, // Owner
-                TEST_CLIENT_SERVER, // Server
+                `${TEST_CLIENT_SERVER}:${TEST_CLIENT_PORT_START + shardId}`, // Server
                 1, // Round
                 50 + Math.random() * 50 // EvaluationAccuracy
             ],
