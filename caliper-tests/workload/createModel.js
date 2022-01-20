@@ -26,13 +26,15 @@ class CreateModelsWorkload extends WorkloadModuleBase {
             TEST_MODEL_HASH ||
             crypto.createHash("sha256").update(crypto.randomBytes(20)).digest("hex");
         // const shardId = Math.floor(Math.random() * this.roundArguments.contractIds.length);
-        const shardId = this.txIndex % this.roundArguments.contractIds.length;
-        const contractId = this.roundArguments.contractIds[shardId];
+        const contractId =
+            this.roundArguments.contractIds[this.txIndex % this.roundArguments.contractIds.length];
+        const shardId = parseInt(contractId[contractId.length - 1]);
 
         let args = {
             contractId: contractId,
             contractFunction: "CreateModel",
-            invokerIdentity: "User1",
+            // invokerIdentity: `User1@org${shardId + 1}.example.com`,
+            invokerMspId: `Org${shardId + 1}MSP`,
             contractArguments: [
                 `model_${modelHash}`, // ID
                 modelHash, // Hash

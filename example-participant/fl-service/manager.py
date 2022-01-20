@@ -4,6 +4,8 @@ import glob
 import argparse
 import threading
 import subprocess
+from typing import Any, List
+from dataclasses import dataclass
 
 import grequests
 from InquirerPy import inquirer
@@ -40,6 +42,12 @@ parser.add_argument(
     help="Use GPU if available",
 )
 parser.add_argument(
+    "--differential-privacy",
+    "-dp",
+    action="store_true",
+    help="Use differential privacy on clients",
+)
+parser.add_argument(
     "--verbose",
     "-v",
     action="store_true",
@@ -47,23 +55,49 @@ parser.add_argument(
 )
 
 
+@dataclass
+class ClientInfo:
+    shard_id: int
+    client_id: int
+    app_server: str = "http://localhost"
+    fabric_server: str = "http://localhost"
+    app_process: Any = None
+    fabric_process: Any = None
+
+    _app_starting_port = 3000
+    _fabric_starting_port = 5000
+
+    @property
+    def app_port(self):
+        return self.shard_id + ClientInfo._app_starting_port
+
+    @property
+    def fabric_port(self):
+        return self.shard_id + ClientInfo._fabric_starting_port
+
+    @property
+    def app_url(self):
+        return f"{self.app_server}:{self.app_port}"
+
+    @property
+    def fabric_url(self):
+        return f"{self.fabric_server}:{self.fabric_port}"
+
+
 def create_fl_client(
-    port: int,
-    client_id: int = 0,
+    client_info: ClientInfo,
     num_clients: int = 0,
-    num_shards: int = 0,
     use_gpu: bool = True,
+    use_dp: bool = True,
     verbose: bool = False,
 ):
-    # Obtain the shardId
-    shard_id = shard_balancers.round_robin(client_id, num_shards)
-
     env_vars = os.environ.copy()
-    env_vars["PORT"] = str(port)
+    env_vars["PORT"] = str(client_info.app_port)
     env_vars["CLIENT_USE_GPU"] = str(use_gpu)
-    env_vars["FABRIC_CHANNEL"] = f"shard{shard_id}"
-    env_vars["CHAINCODE_CONTRACT"] = f"models{shard_id}"
-    env_vars["TEST_SIMULATE_CLIENT_ID"] = str(client_id)
+    env_vars["CLIENT_USE_DIFFERENTIAL_PRIVACY"] = str(use_dp)
+    env_vars["FABRIC_CHANNEL"] = f"shard{client_info.shard_id}"
+    env_vars["CHAINCODE_CONTRACT"] = f"models{client_info.shard_id}"
+    env_vars["TEST_SIMULATE_CLIENT_ID"] = str(client_info.client_id)
     env_vars["TEST_SIMULATE_CLIENTS_COUNT"] = str(num_clients)
 
     verbosity = (
@@ -71,12 +105,13 @@ def create_fl_client(
     )
     app_client = subprocess.Popen(["python", "app.py"], env=env_vars, **verbosity)
 
-    return app_client, f"http://localhost:{env_vars['PORT']}"
+    return app_client
 
 
-def create_fabric_client(port: int, verbose: bool = False):
+def create_fabric_client(client_info: ClientInfo, verbose: bool = False):
     env_vars = os.environ.copy()
-    env_vars["PORT"] = str(port)
+    env_vars["PORT"] = str(client_info.fabric_port)
+    env_vars["SHARD_ID"] = str(client_info.shard_id)
 
     verbosity = (
         {} if verbose else {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
@@ -88,20 +123,17 @@ def create_fabric_client(port: int, verbose: bool = False):
         **verbosity,
     )
 
-    return fabric_client, f"http://localhost:{env_vars['PORT']}"
+    return fabric_client
 
 
-def ensure_fabric_clients(port: int, verbose: bool = False):
+def ensure_fabric_clients(verbose: bool = False):
     created_client = False
-    for idx, client in enumerate(clients):
-        if not client["fabric_client_url"]:
-            fabric_ps, fabric_url = create_fabric_client(
-                port + idx + 2000, verbose=verbose
-            )
-            print(f"Creating Fabric Client {idx}: {fabric_url}")
+    for client in clients:
+        if not client.fabric_process:
+            fabric_ps = create_fabric_client(client, verbose=verbose)
+            print(f"Creating Fabric Client {client.client_id}: {client.fabric_url}")
 
-            client["fabric_client_url"] = fabric_url
-            client["fabric_client_process"] = fabric_ps
+            client.fabric_process = fabric_ps
 
             created_client = True
 
@@ -122,9 +154,7 @@ def start_round(num_clients: int = 0):
     reqs = []
     for client in clients:
         reqs.append(
-            grequests.get(
-                f"{client['app_client_url']}/round/start", params={"round": round}
-            )
+            grequests.get(f"{client.app_url}/round/start", params={"round": round})
         )
 
     ress = grequests.map(reqs)
@@ -143,35 +173,35 @@ DELETE_MODEL_CHECKPOINT = "delete-model-checkpoint"
 DELETE_FABRIC_WALLET = "delete-wallets"
 
 # local
-clients = []
+clients: List[ClientInfo] = []
 round = 0
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
     os.environ["CLIENT_USE_GPU"] = str(args.gpu)
+    os.environ["CLIENT_USE_DIFFERENTIAL_PRIVACY"] = str(args.differential_privacy)
 
     try:
+        ClientInfo._app_starting_port = args.port
+        ClientInfo._fabric_starting_port = args.port + 2000
+
         # Start Clients
         for idx in range(args.participants):
-            fl_ps, fl_url = create_fl_client(
-                port=args.port + idx,
-                client_id=idx,
+            # Obtain the shardId
+            shard_id = shard_balancers.round_robin(idx, args.shards)
+            client_info = ClientInfo(shard_id=shard_id, client_id=idx)
+            fl_ps = create_fl_client(
+                client_info=client_info,
                 num_clients=args.participants,
-                num_shards=args.shards,
                 use_gpu=args.gpu,
+                use_dp=args.differential_privacy,
                 verbose=args.verbose,
             )
-            print(f"Creating FL Client {idx}: {fl_url}")
+            client_info.app_process = fl_ps
+            print(f"Creating FL Client {client_info.client_id}: {client_info.app_url}")
 
-            clients.append(
-                {
-                    "app_client_url": fl_url,
-                    "app_client_process": fl_ps,
-                    "fabric_client_url": None,
-                    "fabric_client_process": None,
-                }
-            )
+            clients.append(client_info)
 
         # Start flower
         while action := inquirer.select(
@@ -181,7 +211,7 @@ if __name__ == "__main__":
                 Choice(GET_SHARDS, name="Query All Shards (catalyst)"),
                 *[
                     Choice(f"{GET_MODELS}{s}", name=f"Query All Models (shard{s})")
-                    for s in range(1, args.shards + 1)
+                    for s in range(args.shards)
                 ],
                 Choice(DELETE_MODEL_CHECKPOINT, name="Delete Model Checkpoints"),
                 Choice(DELETE_FABRIC_WALLET, name="Delete SDK Wallet IDs"),
@@ -191,20 +221,24 @@ if __name__ == "__main__":
         ).execute():
             if action == START_FL:
                 round += 1
-                ensure_fabric_clients(args.port, verbose=args.verbose)
+                ensure_fabric_clients(verbose=args.verbose)
                 start_round(num_clients=args.participants)
             elif action.startswith(GET_MODELS):
-                ensure_fabric_clients(args.port, verbose=args.verbose)
+                ensure_fabric_clients(verbose=args.verbose)
+                shard_id = int(action[len(GET_MODELS) :])
                 print(
                     query_chaincode(
-                        f"shard{action[len(GET_MODELS):]}",
-                        f"models{action[len(GET_MODELS):]}",
+                        f"shard{shard_id}",
+                        f"models{shard_id}",
                         "GetAllModels",
                         [],
+                        port=next(
+                            client for client in clients if client.shard_id == shard_id
+                        ).fabric_port,
                     )
                 )
             elif action == GET_SHARDS:
-                ensure_fabric_clients(args.port, verbose=args.verbose)
+                ensure_fabric_clients(verbose=args.verbose)
                 print(query_chaincode("mainline", "catalyst", "GetAllShards", []))
             elif action == DELETE_MODEL_CHECKPOINT:
                 model_files = glob.glob("model/*.pkl", recursive=True)
@@ -230,10 +264,10 @@ if __name__ == "__main__":
                             os.remove(wallet_id)
 
     except Exception as e:
-        print(f"manager.py Error: {e}")
+        print(f"manager.py Error: {e.with_traceback()}")
     finally:
         for client in clients:
-            if client["app_client_process"]:
-                client["app_client_process"].terminate()
-            if client["fabric_client_process"]:
-                client["fabric_client_process"].terminate()
+            if client.app_process:
+                client.app_process.terminate()
+            if client.fabric_process:
+                client.fabric_process.terminate()

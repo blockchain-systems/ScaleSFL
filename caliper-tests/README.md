@@ -38,3 +38,61 @@ npx caliper launch manager \
     --caliper-flow-only-test \
     --caliper-fabric-gateway-enabled
 ```
+
+## Notes
+
+When setting up tests with multiple independent channels, for example
+
+```
+channels
+├── mainline
+│   ├── org1
+│   ├── org2
+│   └── org3
+├── shard0
+│   └── org1
+├── shard1
+│   └── org2
+├── shard2
+│   └── org3
+```
+
+service discovery fails. Because of this we can manually define the network configurations using [connection profiles](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/connectionprofile.html) and disable service discovery.
+
+for example we could add channels and orderers to the templated connection profiles
+
+```yaml
+channels:
+    mainline:
+        orderers:
+            - orderer.example.com
+        peers:
+            peer0.org1.example.com:
+                eventSource: true
+            peer0.org2.example.com:
+                eventSource: true
+            peer0.org3.example.com:
+                eventSource: true
+    shard0:
+        orderers:
+            - orderer.example.com
+        peers:
+            peer0.org1.example.com:
+                eventSource: true
+```
+
+```yaml
+orderers:
+    orderer.example.com:
+        url: grpcs://localhost:7050
+        grpcOptions:
+            ssl-target-name-override: orderer.example.com
+        tlsCACerts:
+            path: "../test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+```
+
+Make sure to add the other peer definitions in each connection profile as well.
+
+Additionally there seems to be a bug in the benchmark [rate controllers](https://hyperledger.github.io/caliper/v0.4.2/rate-controllers/) for `fixed-feedback-rate`, so be sure to experiment with other controllers.
+
+Another bug in Caliper that seems to cause failures sometimes when all workers do not exit, usually caused if the requests are long running as we are experiencing for these tests. If this happens try to limit the workers such that they match the number of shards.

@@ -4,26 +4,41 @@ test:
         number: 3
     rounds:
         - label: Create models simuating 1 shards training
-          txDuration: 30
+          txDuration: &txdur 30
+          txNumber: &txnum 50
           rateControl: &rateControl
-              type: fixed-feedback-rate
+              type: fixed-rate
               opts:
-                  tps: 2
-                  transactionLoad: 2
+                  tps: 1
+          #   rateControl: &rateControl
+          #       type: maximum-rate
+          #       opts:
+          #           tps: 0.5
+          #           step: 0.5
+          #           sampleInterval: 5
+          #           includeFailed: false
           workload:
               module: workload/createModel.js
               arguments:
                   contractIds: [models0]
         - label: Create models simuating 2 shard training
-          txDuration: 30
-          rateControl: *rateControl
+          #   txDuration: *txdur
+          txNumber: *txnum
+          rateControl:
+              type: fixed-rate
+              opts:
+                  tps: 3
           workload:
               module: workload/createModel.js
               arguments:
                   contractIds: [models0, models1]
         - label: Create models simuating 3 shard training
-          txDuration: 30
-          rateControl: *rateControl
+          #   txDuration: *txdur
+          txNumber: *txnum
+          rateControl:
+              type: fixed-rate
+              opts:
+                  tps: 5
           workload:
               module: workload/createModel.js
               arguments:

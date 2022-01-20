@@ -3,8 +3,8 @@ import flwr as fl
 
 from .strategies import CommitteeStrategy
 from .models.utils import set_parameters, load_model
-from .datasets import cifar10_test
-from .models.simple_cnn import create_model
+from .datasets import mnist_test
+from .models.mlp import create_model
 from .models.evaluation.train_cls import test
 
 
@@ -12,10 +12,11 @@ def get_eval_fn():
     """Return an evaluation function for server-side evaluation."""
 
     # Load model
-    net = create_model()
+    # net = create_model(in_channels=1, dim_out=10, img_size=28)
+    net = create_model(layer_dims=[28 * 28 * 1, 10])
 
     # Use the last 5k training examples as a validation set
-    testloader = cifar10_test()
+    testloader = mnist_test()
 
     # The `evaluate` function will be called after every round
     def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:

@@ -5,10 +5,12 @@
 . scripts/utils.sh
 
 CHANNEL_NAME="$1"
-DELAY="$2"
-MAX_RETRY="$3"
-VERBOSE="$4"
+ORGS="$2"
+DELAY="$3"
+MAX_RETRY="$4"
+VERBOSE="$5"
 : ${CHANNEL_NAME:="mychannel"}
+: ${ORGS:="1,2,3"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
 : ${VERBOSE:="false"}
@@ -22,8 +24,14 @@ createChannelGenesisBlock() {
 	if [ "$?" -ne 0 ]; then
 		fatalln "configtxgen tool not found."
 	fi
-	set -x
-	configtxgen -profile TwoOrgsApplicationGenesis -outputBlock ./channel-artifacts/${CHANNEL_NAME}.block -channelID $CHANNEL_NAME
+	set -x 
+	if [ ${#ORGS} -gt 1 ]; then 
+		PROFILE=ThreeOrgsApplicationGenesis
+	else
+		PROFILE=Org${ORGS}ApplicationGenesis
+	fi
+	infoln "Using configtxgen profile '$PROFILE' "
+	configtxgen -profile $PROFILE -outputBlock ./channel-artifacts/${CHANNEL_NAME}.block -channelID $CHANNEL_NAME
 	res=$?
 	{ set +x; } 2>/dev/null
   verifyResult $res "Failed to generate channel configuration transaction..."
@@ -88,15 +96,15 @@ createChannel
 successln "Channel '$CHANNEL_NAME' created"
 
 ## Join all the peers to the channel
-infoln "Joining org1 peer to the channel..."
-joinChannel 1
-infoln "Joining org2 peer to the channel..."
-joinChannel 2
+for i in ${ORGS//,/ }; do 
+	infoln "Joining org$1 peer to the channel..."
+	joinChannel $i
+done
 
 ## Set the anchor peers for each org in the channel
-infoln "Setting anchor peer for org1..."
-setAnchorPeer 1
-infoln "Setting anchor peer for org2..."
-setAnchorPeer 2
+for i in ${ORGS//,/ }; do 
+	infoln "Setting anchor peer for org$i..."
+	setAnchorPeer $i
+done
 
 successln "Channel '$CHANNEL_NAME' joined"

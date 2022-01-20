@@ -8,9 +8,15 @@ import warnings
 import requests
 from flask import Flask
 from flask import request, abort
+from flwr.common.typing import EvaluateIns
 
 from src.client import client_pipline
-from src.models.utils import client_model_info, deserialize_model, model_info
+from src.models.utils import (
+    client_model_info,
+    deserialize_model,
+    model_info,
+    ModelCheckpointInfo,
+)
 from src.utils.endorsement import endorse_model
 from src.fabric.chaincode import invoke_chaincode
 
@@ -20,7 +26,7 @@ FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL", "shard0")
 CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models0")
 CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN", "CreateModel")
 
-TEST_SIMULATE_ENDORSE = os.environ.get("TEST_SIMULATE_ENDORSE", True)
+TEST_SIMULATE_ENDORSE = os.environ.get("TEST_SIMULATE_ENDORSE", True) == True
 TEST_SIMULATE_CLIENT_ID = int(os.environ.get("TEST_SIMULATE_CLIENT_ID", 0))
 TEST_SIMULATE_CLIENTS_COUNT = int(os.environ.get("TEST_SIMULATE_CLIENTS_COUNT", 0))
 app = Flask(__name__)
@@ -35,33 +41,28 @@ def index():
 def start_fl():
     round = request.args.get("round")
 
-    def post_model():
-        client.numpy_client.evaluate(client.numpy_client.get_parameters())
-
+    def post_model(checkpoint_info: ModelCheckpointInfo):
         # push weights learned locally
-        info = client_model_info(client)
         invoke_chaincode(
             FABRIC_CHANNEL,
             CHAINCODE_CONTRACT,
             CHAINCODE_CREATE_MODEL_FN,
             [
-                f"model_{info['model_hash']}",
-                info["model_hash"],
+                f"model_{checkpoint_info.model_hash}",
+                checkpoint_info.model_hash,
                 PORT,
                 request.host_url,
                 round,
-                client.numpy_client.checkpoint_info["last_acc"],
+                checkpoint_info.last_acc,
             ],
             port=CLIENT_PORT,
         )
-
-        return info
 
     # Start a round of FL
     client.numpy_client.post_model = post_model
     start_client()
 
-    return client.numpy_client.checkpoint_info
+    return client_model_info(client)
 
 
 @app.route("/model")
@@ -73,6 +74,8 @@ def model():
         "serialized_model": info["serialized_model"],
         "last_acc": info["last_acc"],
         "highest_acc": info["highest_acc"],
+        "parameter_count": info["parameter_count"],
+        "epsilon": info["epsilon"],
     }
 
 
@@ -87,8 +90,9 @@ def model_info_hash():
 def evaluate_model():
     serialized_model = request.data
     parameters_res = deserialize_model(serialized_model)
+    parameters = parameters_res.parameters
 
-    eval_res = client.evaluate({"parameters": parameters_res.parameters, "config": {}})
+    eval_res = client.evaluate(EvaluateIns(parameters=parameters, config={}))
     eval = json.dumps(eval_res)
 
     return eval
@@ -107,10 +111,12 @@ def evaluate_rwset():
             and "writes" in kvRwSet
             and ns == CHAINCODE_CONTRACT
         ):
-            if TEST_SIMULATE_ENDORSE:
-                time.sleep(1.4)
-                return {"status": 200}, 200
             for write in kvRwSet["writes"]:
+                if TEST_SIMULATE_ENDORSE:
+                    with client.numpy_client.lock:
+                        time.sleep(1.4)
+                    return {"status": 200}, 200
+
                 _, bc_model = write["key"], json.loads(base64.b64decode(write["value"]))
 
                 res = requests.get(f"{bc_model['Server']}/model").json()
@@ -145,4 +151,4 @@ if __name__ == "__main__":
     )
 
     # Start Flask
-    app.run(host="0.0.0.0", port=PORT)
+    app.run(host="0.0.0.0", port=PORT, threaded=True, processes=1)

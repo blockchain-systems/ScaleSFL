@@ -1,4 +1,5 @@
 import hashlib
+from dataclasses import dataclass
 from collections import OrderedDict
 
 import torch
@@ -7,6 +8,16 @@ from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.common import ParametersRes
 
 from .serde import serialize_model_params_res
+
+
+@dataclass
+class ModelCheckpointInfo:
+    model_hash: str = ""
+    serialized_model: str = ""
+    last_acc: int = 0
+    highest_acc: int = 0
+    parameter_count: int = 0
+    epsilon: float = 0.0
 
 
 def get_parameters(model):
@@ -49,6 +60,8 @@ def client_model_info(client: NumPyClientWrapper):
     parameters_res = client.get_parameters()
     return {
         **model_info(parameters_res),
-        "last_acc": client.numpy_client.checkpoint_info["last_acc"],
-        "highest_acc": client.numpy_client.checkpoint_info["highest_acc"],
+        "last_acc": client.numpy_client.checkpoint_info.last_acc,
+        "highest_acc": client.numpy_client.checkpoint_info.highest_acc,
+        "parameter_count": client.numpy_client.checkpoint_info.parameter_count,
+        "epsilon": client.numpy_client.checkpoint_info.epsilon,
     }

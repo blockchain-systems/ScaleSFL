@@ -3,20 +3,22 @@
 source scripts/utils.sh
 
 CHANNEL_NAME=${1:-"mychannel"}
-CC_NAME=${2}
-CC_SRC_PATH=${3}
-CC_SRC_LANGUAGE=${4}
-CC_VERSION=${5:-"1.0"}
-CC_SEQUENCE=${6:-"1"}
-CC_INIT_FCN=${7:-"NA"}
-CC_END_POLICY=${8:-"NA"}
-CC_COLL_CONFIG=${9:-"NA"}
-DELAY=${10:-"3"}
-MAX_RETRY=${11:-"5"}
-VERBOSE=${12:-"false"}
+ORGS="$2"
+CC_NAME=${3}
+CC_SRC_PATH=${4}
+CC_SRC_LANGUAGE=${5}
+CC_VERSION=${6:-"1.0"}
+CC_SEQUENCE=${7:-"1"}
+CC_INIT_FCN=${8:-"NA"}
+CC_END_POLICY=${9:-"NA"}
+CC_COLL_CONFIG=${10:-"NA"}
+DELAY=${11:-"3"}
+MAX_RETRY=${12:-"5"}
+VERBOSE=${13:-"false"}
 
 println "executing with the following"
 println "- CHANNEL_NAME: ${C_GREEN}${CHANNEL_NAME}${C_RESET}"
+println "- ORGS: ${C_GREEN}${ORGS}${C_RESET}"
 println "- CC_NAME: ${C_GREEN}${CC_NAME}${C_RESET}"
 println "- CC_SRC_PATH: ${C_GREEN}${CC_SRC_PATH}${C_RESET}"
 println "- CC_SRC_LANGUAGE: ${C_GREEN}${CC_SRC_LANGUAGE}${C_RESET}"
@@ -29,6 +31,7 @@ println "- DELAY: ${C_GREEN}${DELAY}${C_RESET}"
 println "- MAX_RETRY: ${C_GREEN}${MAX_RETRY}${C_RESET}"
 println "- VERBOSE: ${C_GREEN}${VERBOSE}${C_RESET}"
 
+ORGS_ARRAY=(${ORGS//,/ })
 FABRIC_CFG_PATH=$PWD/../config/
 
 #User has not provided a name
@@ -287,43 +290,51 @@ chaincodeQuery() {
 packageChaincode
 
 ## Install chaincode on peer0.org1 and peer0.org2
-infoln "Installing chaincode on peer0.org1..."
-installChaincode 1
-infoln "Install chaincode on peer0.org2..."
-installChaincode 2
+for i in ${ORGS//,/ }; do 
+  infoln "Installing chaincode on peer0.org$i..."
+  installChaincode $i
+done
 
 ## query whether the chaincode is installed
-queryInstalled 1
+for i in ${ORGS//,/ }; do 
+  queryInstalled $i
+done
 
 ## approve the definition for org1
-approveForMyOrg 1
+for i in ${ORGS//,/ }; do 
+  approveForMyOrg $i
+done
 
 ## check whether the chaincode definition is ready to be committed
 ## expect org1 to have approved and org2 not to
-checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": false"
-checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": false"
+for i in ${ORGS//,/ }; do 
+  checkCommitReadiness $i "\"Org${i}MSP\": true"
+done
+# checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": false"
+# checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": false"
 
 ## now approve also for org2
-approveForMyOrg 2
+# approveForMyOrg 2
 
 ## check whether the chaincode definition is ready to be committed
 ## expect them both to have approved
-checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": true"
-checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": true"
+# checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": true"
+# checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": true"
 
 ## now that we know for sure both orgs have approved, commit the definition
-commitChaincodeDefinition 1 2
+commitChaincodeDefinition "${ORGS_ARRAY[@]}"
 
 ## query on both orgs to see that the definition committed successfully
-queryCommitted 1
-queryCommitted 2
+for i in ${ORGS//,/ }; do 
+  queryCommitted $i
+done
 
 ## Invoke the chaincode - this does require that the chaincode have the 'initLedger'
 ## method defined
 if [ "$CC_INIT_FCN" = "NA" ]; then
   infoln "Chaincode initialization is not required"
 else
-  chaincodeInvokeInit 1 2
+  chaincodeInvokeInit "${ORGS_ARRAY[@]}"
 fi
 
 exit 0

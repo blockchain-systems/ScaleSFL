@@ -15,7 +15,7 @@ CIFAR_CLASSES = [
     "ship",
     "truck",
 ]
-MNIST_CLASSES = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+MNIST_CLASSES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 FASHION_MNIST_CLASSES = [
     "T-Shirt",
     "Trouser",
