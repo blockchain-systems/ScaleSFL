@@ -16,6 +16,8 @@ from src.fabric.chaincode import query_chaincode
 from src.utils import shard_balancers
 
 parser = argparse.ArgumentParser(description="Run Federated Learning")
+
+# Sample info
 parser.add_argument(
     "--participants",
     "-p",
@@ -30,6 +32,8 @@ parser.add_argument(
     help="Number of shards available",
     default=2,
 )
+
+# Client info
 parser.add_argument(
     "--port",
     type=int,
@@ -37,16 +41,25 @@ parser.add_argument(
     default=3000,
 )
 parser.add_argument(
-    "--gpu",
-    action="store_true",
-    help="Use GPU if available",
-)
-parser.add_argument(
     "--differential-privacy",
     "-dp",
     action="store_true",
     help="Use differential privacy on clients",
 )
+device_parser = parser.add_mutually_exclusive_group()
+device_parser.add_argument(
+    "--gpu",
+    action="store_true",
+    help="Use GPU if available",
+)
+device_parser.add_argument(
+    "--num-threads",
+    type=int,
+    help="How many threads each client should use",
+    default=2,
+)
+
+# Config
 parser.add_argument(
     "--verbose",
     "-v",
@@ -88,12 +101,14 @@ def create_fl_client(
     client_info: ClientInfo,
     num_clients: int = 0,
     use_gpu: bool = True,
+    num_threads: bool = 0,
     use_dp: bool = True,
     verbose: bool = False,
 ):
     env_vars = os.environ.copy()
     env_vars["PORT"] = str(client_info.app_port)
     env_vars["CLIENT_USE_GPU"] = str(use_gpu)
+    env_vars["CLIENT_NUM_THREADS"] = str(num_threads)
     env_vars["CLIENT_USE_DIFFERENTIAL_PRIVACY"] = str(use_dp)
     env_vars["FABRIC_CHANNEL"] = f"shard{client_info.shard_id}"
     env_vars["CHAINCODE_CONTRACT"] = f"models{client_info.shard_id}"
@@ -195,6 +210,7 @@ if __name__ == "__main__":
                 client_info=client_info,
                 num_clients=args.participants,
                 use_gpu=args.gpu,
+                num_threads=args.num_threads,
                 use_dp=args.differential_privacy,
                 verbose=args.verbose,
             )
