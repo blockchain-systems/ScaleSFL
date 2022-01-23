@@ -1,19 +1,19 @@
 test:
     workers:
         type: local
-        number: 3
+        number: 2
     rounds:
-        - label: Create models simuating 1 shards training
+        - label: Create models simulating 1 shards training
           #   txDuration: &txdur 30
-          txNumber: &txnum 50
+          txNumber: &txnum 1180
           rateControl: &rateControl
               type: fixed-rate
               opts:
-                  tps: 3
+                  tps: 6
           #   rateControl: &rateControl
           #       type: maximum-rate
           #       opts:
-          #           tps: 0.5
+          #           tps: 6.5
           #           step: 0.5
           #           sampleInterval: 5
           #           includeFailed: false
@@ -21,81 +21,3 @@ test:
               module: workload/createModel.js
               arguments:
                   contractIds: [models0]
-        - label: Create models simuating 2 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 6
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds: [models0, models1]
-        - label: Create models simuating 3 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 9
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds: [models0, models1, models2]
-        - label: Create models simuating 4 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 12
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds: [models0, models1, models2, models3]
-        - label: Create models simuating 5 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 15
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds: [models0, models1, models2, models3, models4]
-        - label: Create models simuating 6 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 18
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds: [models0, models1, models2, models3, models4, models5]
-        - label: Create models simuating 7 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 21
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds: [models0, models1, models2, models3, models4, models5, models6]
-        - label: Create models simuating 8 shard training
-          #   txDuration: *txdur
-          txNumber: *txnum
-          rateControl:
-              type: fixed-rate
-              opts:
-                  tps: 24
-          workload:
-              module: workload/createModel.js
-              arguments:
-                  contractIds:
-                      [models0, models1, models2, models3, models4, models5 models6, models7]

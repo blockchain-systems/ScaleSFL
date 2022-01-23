@@ -97,4 +97,4 @@ Make sure to add the other peer definitions in each connection profile as well.
 
 Additionally there seems to be a bug in the benchmark [rate controllers](https://hyperledger.github.io/caliper/v0.4.2/rate-controllers/) for `fixed-feedback-rate`, so be sure to experiment with other controllers.
 
-Another bug in Caliper that seems to cause failures sometimes when all workers do not exit, usually caused if the requests are long running as we are experiencing for these tests. If this happens try to limit the workers such that they match the number of shards.
+Another bug in Caliper that seems to cause failures sometimes when all workers do not exit ([Issue#1068](https://github.com/hyperledger/caliper/issues/1068)), usually caused if the requests are long running as we are experiencing for these tests, or the SUT is under heavy load. If this happens try to limit the workers such that they match the number of shards, or split the benchmark into a single round.
