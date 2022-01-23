@@ -26,7 +26,7 @@ FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL", "shard0")
 CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models0")
 CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN", "CreateModel")
 
-TEST_SIMULATE_ENDORSE = os.environ.get("TEST_SIMULATE_ENDORSE", True) == True
+TEST_SIMULATE_ENDORSE = os.environ.get("TEST_SIMULATE_ENDORSE", False) == True
 TEST_SIMULATE_CLIENT_ID = int(os.environ.get("TEST_SIMULATE_CLIENT_ID", 0))
 TEST_SIMULATE_CLIENTS_COUNT = int(os.environ.get("TEST_SIMULATE_CLIENTS_COUNT", 0))
 app = Flask(__name__)

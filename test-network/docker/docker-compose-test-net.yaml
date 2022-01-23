@@ -10,6 +10,11 @@ volumes:
     peer0.org1.example.com:
     peer0.org2.example.com:
     peer0.org3.example.com:
+    peer0.org4.example.com:
+    peer0.org5.example.com:
+    peer0.org6.example.com:
+    peer0.org7.example.com:
+    peer0.org8.example.com:
 
 networks:
     test:
@@ -125,7 +130,7 @@ services:
             - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:9051
             - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
             - CORE_PEER_LOCALMSPID=Org2MSP
-            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:19051
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:18051
             # CUSTOM ENV
             - FLASK_SERVER=http://192.168.1.170:3001/endorse/evaluate
         volumes:
@@ -138,7 +143,7 @@ services:
         command: peer node start
         ports:
             - 9051:9051
-            - 19051:19051
+            - 18051:18051
         networks:
             - test
 
@@ -167,6 +172,7 @@ services:
             - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org3.example.com:11051
             - CORE_PEER_LOCALMSPID=Org3MSP
             - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:20051
             # CUSTOM ENV
             - FLASK_SERVER=http://192.168.1.170:3002/endorse/evaluate
         volumes:
@@ -179,8 +185,220 @@ services:
         command: peer node start
         ports:
             - 11051:11051
+            - 20051:20051
         networks:
             - test
+
+    peer0.org4.example.com:
+        container_name: peer0.org4.example.com
+        image: hyperledger/fabric-peer:latest
+        labels:
+            service: hyperledger-fabric
+        environment:
+            #Generic peer variables
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+            - FABRIC_LOGGING_SPEC=INFO
+            #- FABRIC_LOGGING_SPEC=DEBUG
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            # Peer specific variables
+            - CORE_PEER_ID=peer0.org4.example.com
+            - CORE_PEER_ADDRESS=peer0.org4.example.com:12051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:12051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.org4.example.com:12052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:12052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org4.example.com:12051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org4.example.com:12051
+            - CORE_PEER_LOCALMSPID=Org4MSP
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:21051
+            # CUSTOM ENV
+            - FLASK_SERVER=http://192.168.1.170:3003/endorse/evaluate
+        volumes:
+            - ${DOCKER_SOCK}:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls:/etc/hyperledger/fabric/tls
+            - ../../config/core.yaml:/etc/hyperledger/fabric/core.yaml
+            - peer0.org4.example.com:/var/hyperledger/production
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: peer node start
+        ports:
+            - 12051:12051
+            - 21051:21051
+        networks:
+            - test
+
+    peer0.org5.example.com:
+        container_name: peer0.org5.example.com
+        image: hyperledger/fabric-peer:latest
+        labels:
+            service: hyperledger-fabric
+        environment:
+            #Generic peer variables
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+            - FABRIC_LOGGING_SPEC=INFO
+            #- FABRIC_LOGGING_SPEC=DEBUG
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            # Peer specific variables
+            - CORE_PEER_ID=peer0.org5.example.com
+            - CORE_PEER_ADDRESS=peer0.org5.example.com:13051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:13051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.org5.example.com:13052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:13052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org5.example.com:13051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org5.example.com:13051
+            - CORE_PEER_LOCALMSPID=Org5MSP
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:22051
+            # CUSTOM ENV
+            - FLASK_SERVER=http://192.168.1.170:3004/endorse/evaluate
+        volumes:
+            - ${DOCKER_SOCK}:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/org5.example.com/peers/peer0.org5.example.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/org5.example.com/peers/peer0.org5.example.com/tls:/etc/hyperledger/fabric/tls
+            - ../../config/core.yaml:/etc/hyperledger/fabric/core.yaml
+            - peer0.org5.example.com:/var/hyperledger/production
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: peer node start
+        ports:
+            - 13051:13051
+            - 22051:22051
+        networks:
+            - test
+
+    peer0.org6.example.com:
+        container_name: peer0.org6.example.com
+        image: hyperledger/fabric-peer:latest
+        labels:
+            service: hyperledger-fabric
+        environment:
+            #Generic peer variables
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+            - FABRIC_LOGGING_SPEC=INFO
+            #- FABRIC_LOGGING_SPEC=DEBUG
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            # Peer specific variables
+            - CORE_PEER_ID=peer0.org6.example.com
+            - CORE_PEER_ADDRESS=peer0.org6.example.com:14051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:14051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.org6.example.com:14052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:14052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org6.example.com:14051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org6.example.com:14051
+            - CORE_PEER_LOCALMSPID=Org6MSP
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:23051
+            # CUSTOM ENV
+            - FLASK_SERVER=http://192.168.1.170:3005/endorse/evaluate
+        volumes:
+            - ${DOCKER_SOCK}:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/org6.example.com/peers/peer0.org6.example.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/org6.example.com/peers/peer0.org6.example.com/tls:/etc/hyperledger/fabric/tls
+            - ../../config/core.yaml:/etc/hyperledger/fabric/core.yaml
+            - peer0.org6.example.com:/var/hyperledger/production
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: peer node start
+        ports:
+            - 14051:14051
+            - 23051:23051
+        networks:
+            - test
+
+    peer0.org7.example.com:
+        container_name: peer0.org7.example.com
+        image: hyperledger/fabric-peer:latest
+        labels:
+            service: hyperledger-fabric
+        environment:
+            #Generic peer variables
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+            - FABRIC_LOGGING_SPEC=INFO
+            #- FABRIC_LOGGING_SPEC=DEBUG
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            # Peer specific variables
+            - CORE_PEER_ID=peer0.org7.example.com
+            - CORE_PEER_ADDRESS=peer0.org7.example.com:15051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:15051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.org7.example.com:15052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:15052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org7.example.com:15051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org7.example.com:15051
+            - CORE_PEER_LOCALMSPID=Org7MSP
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:24051
+            # CUSTOM ENV
+            - FLASK_SERVER=http://192.168.1.170:3006/endorse/evaluate
+        volumes:
+            - ${DOCKER_SOCK}:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/org7.example.com/peers/peer0.org7.example.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/org7.example.com/peers/peer0.org7.example.com/tls:/etc/hyperledger/fabric/tls
+            - ../../config/core.yaml:/etc/hyperledger/fabric/core.yaml
+            - peer0.org7.example.com:/var/hyperledger/production
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: peer node start
+        ports:
+            - 15051:15051
+            - 24051:24051
+        networks:
+            - test
+
+    peer0.org8.example.com:
+        container_name: peer0.org8.example.com
+        image: hyperledger/fabric-peer:latest
+        labels:
+            service: hyperledger-fabric
+        environment:
+            #Generic peer variables
+            - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
+            - FABRIC_LOGGING_SPEC=INFO
+            #- FABRIC_LOGGING_SPEC=DEBUG
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            # Peer specific variables
+            - CORE_PEER_ID=peer0.org8.example.com
+            - CORE_PEER_ADDRESS=peer0.org8.example.com:16051
+            - CORE_PEER_LISTENADDRESS=0.0.0.0:16051
+            - CORE_PEER_CHAINCODEADDRESS=peer0.org8.example.com:16052
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:16052
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org8.example.com:16051
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org8.example.com:16051
+            - CORE_PEER_LOCALMSPID=Org8MSP
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:25051
+            # CUSTOM ENV
+            - FLASK_SERVER=http://192.168.1.170:3007/endorse/evaluate
+        volumes:
+            - ${DOCKER_SOCK}:/host/var/run/docker.sock
+            - ../organizations/peerOrganizations/org8.example.com/peers/peer0.org8.example.com/msp:/etc/hyperledger/fabric/msp
+            - ../organizations/peerOrganizations/org8.example.com/peers/peer0.org8.example.com/tls:/etc/hyperledger/fabric/tls
+            - ../../config/core.yaml:/etc/hyperledger/fabric/core.yaml
+            - peer0.org8.example.com:/var/hyperledger/production
+        working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+        command: peer node start
+        ports:
+            - 16051:16051
+            - 25051:25051
+        networks:
+            - test
+
     cli:
         container_name: cli
         image: hyperledger/fabric-tools:latest
@@ -202,5 +420,10 @@ services:
             - peer0.org1.example.com
             - peer0.org2.example.com
             - peer0.org3.example.com
+            - peer0.org4.example.com
+            - peer0.org5.example.com
+            - peer0.org6.example.com
+            - peer0.org7.example.com
+            - peer0.org8.example.com
         networks:
             - test

@@ -2,7 +2,8 @@
 set -e
 
 # Config
-num_shards=3
+num_shards=8
+orgs=$(seq -s ',' 1 $num_shards)
 main_chain_channel="mainline"
 shards_channel_prefix="shard"
 task_chaincode_name="catalyst"
@@ -15,10 +16,10 @@ starttime=$(date +%s)
 
 # Bring network up
 ./network.sh down # remove any containers from previous runs (optional)
-./network.sh up -ca -orgs 1,2,3
+./network.sh up -ca -orgs $orgs
 
 # Create channels
-./network.sh createChannel -c $main_chain_channel -orgs 1,2,3
+./network.sh createChannel -c $main_chain_channel -orgs $orgs
 for i in `seq 0 $(($num_shards - 1))`; do
     ./network.sh createChannel -c $shards_channel_prefix$i -orgs $((i + 1))
 done
@@ -29,7 +30,7 @@ done
     -ccn $task_chaincode_name \
     -ccp $task_chaincode \
     -ccl typescript \
-    -orgs 1,2,3
+    -orgs $orgs
 for i in `seq 0 $(($num_shards - 1))`; do
     ./network.sh deployCC \
         -c $shards_channel_prefix$i \
@@ -57,9 +58,11 @@ peer chaincode invoke \
     --peerAddresses localhost:7051 \
     --peerAddresses localhost:9051 \
     --peerAddresses localhost:11051 \
+    --peerAddresses localhost:12051 \
     --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
     --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
     --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt \
+    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt \
     -c '{"function":"InitLedger","Args":[]}'
 
 # init shard ledger 

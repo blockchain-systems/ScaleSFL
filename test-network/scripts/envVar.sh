@@ -15,6 +15,11 @@ export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers
 export PEER0_ORG1_CA=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
 export PEER0_ORG2_CA=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 export PEER0_ORG3_CA=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export PEER0_ORG4_CA=${PWD}/organizations/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/tls/ca.crt
+export PEER0_ORG5_CA=${PWD}/organizations/peerOrganizations/org5.example.com/peers/peer0.org5.example.com/tls/ca.crt
+export PEER0_ORG6_CA=${PWD}/organizations/peerOrganizations/org6.example.com/peers/peer0.org6.example.com/tls/ca.crt
+export PEER0_ORG7_CA=${PWD}/organizations/peerOrganizations/org7.example.com/peers/peer0.org7.example.com/tls/ca.crt
+export PEER0_ORG8_CA=${PWD}/organizations/peerOrganizations/org8.example.com/peers/peer0.org8.example.com/tls/ca.crt
 export ORDERER_ADMIN_TLS_SIGN_CERT=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
 export ORDERER_ADMIN_TLS_PRIVATE_KEY=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.key
 
@@ -37,12 +42,36 @@ setGlobals() {
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
     export CORE_PEER_ADDRESS=localhost:9051
-
   elif [ $USING_ORG -eq 3 ]; then
     export CORE_PEER_LOCALMSPID="Org3MSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG3_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
     export CORE_PEER_ADDRESS=localhost:11051
+  elif [ $USING_ORG -eq 4 ]; then
+    export CORE_PEER_LOCALMSPID="Org4MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG4_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org4.example.com/users/Admin@org4.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:12051
+  elif [ $USING_ORG -eq 5 ]; then
+    export CORE_PEER_LOCALMSPID="Org5MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG5_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org5.example.com/users/Admin@org5.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:13051
+  elif [ $USING_ORG -eq 6 ]; then
+    export CORE_PEER_LOCALMSPID="Org6MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG6_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org6.example.com/users/Admin@org6.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:14051
+  elif [ $USING_ORG -eq 7 ]; then
+    export CORE_PEER_LOCALMSPID="Org7MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG7_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org7.example.com/users/Admin@org7.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:15051
+  elif [ $USING_ORG -eq 8 ]; then
+    export CORE_PEER_LOCALMSPID="Org8MSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG8_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org8.example.com/users/Admin@org8.example.com/msp
+    export CORE_PEER_ADDRESS=localhost:16051
   else
     errorln "ORG Unknown"
   fi
@@ -68,6 +97,16 @@ setGlobalsCLI() {
     export CORE_PEER_ADDRESS=peer0.org2.example.com:9051
   elif [ $USING_ORG -eq 3 ]; then
     export CORE_PEER_ADDRESS=peer0.org3.example.com:11051
+  elif [ $USING_ORG -eq 4 ]; then
+    export CORE_PEER_ADDRESS=peer0.org4.example.com:12051
+  elif [ $USING_ORG -eq 5 ]; then
+    export CORE_PEER_ADDRESS=peer0.org4.example.com:13051
+  elif [ $USING_ORG -eq 6 ]; then
+    export CORE_PEER_ADDRESS=peer0.org4.example.com:14051
+  elif [ $USING_ORG -eq 7 ]; then
+    export CORE_PEER_ADDRESS=peer0.org4.example.com:15051
+  elif [ $USING_ORG -eq 8 ]; then
+    export CORE_PEER_ADDRESS=peer0.org4.example.com:16051
   else
     errorln "ORG Unknown"
   fi

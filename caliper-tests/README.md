@@ -32,11 +32,13 @@ ls -la ../test-network/organizations/peerOrganizations/org*.example.com/users/Us
 cd $CALIPER_FOLDER_ROOT
 
 npx caliper launch manager \
-    --caliper-workspace . \
-    --caliper-benchconfig benchmarks/config.yaml \
-    --caliper-networkconfig networks/fabric-config.yaml \
-    --caliper-flow-only-test \
-    --caliper-fabric-gateway-enabled
+        --caliper-workspace . \
+        --caliper-benchconfig benchmarks/model-creation.yaml \
+        --caliper-networkconfig networks/fabric-config.yaml \
+        --caliper-progress-reporting-interval 2000 \
+        --caliper-flow-only-test \
+        --caliper-worker-pollinterval 250 \
+        --caliper-fabric-gateway-enabled
 ```
 
 ## Notes

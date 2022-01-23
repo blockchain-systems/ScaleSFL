@@ -26,7 +26,7 @@ createChannelGenesisBlock() {
 	fi
 	set -x 
 	if [ ${#ORGS} -gt 1 ]; then 
-		PROFILE=ThreeOrgsApplicationGenesis
+		PROFILE=EightOrgsApplicationGenesis
 	else
 		PROFILE=Org${ORGS}ApplicationGenesis
 	fi

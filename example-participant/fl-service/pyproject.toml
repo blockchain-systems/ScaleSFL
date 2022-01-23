@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "example-participant"
 version = "0.0.1"
-description = "An example participant in sharded committee consensus"
+description = "An example participant in sharded federated learning"
 authors = ["Evan Madill <madille@myumanitoba.ca>"]
 
 [tool.poetry.dependencies]

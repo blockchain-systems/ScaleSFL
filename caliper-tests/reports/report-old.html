@@ -128,7 +128,7 @@
                 <li>DLT: &nbsp<span style="font-weight: 500;">fabric</span></li>
                 <li>Name: &nbsp<span style="font-weight: 500;"></span></li>
                 <li>Description: &nbsp<span style="font-weight: 500;"></span></li>
-                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">4</span></li>
+                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">3</span></li>
                 <li><a href="#benchmarkInfo">Details</a></li>
             </ul>
             <ul>
@@ -137,7 +137,6 @@
                     <li><a href="#Create models simuating 1 shards training">Create models simuating 1 shards training</a></li>
                     <li><a href="#Create models simuating 2 shard training">Create models simuating 2 shard training</a></li>
                     <li><a href="#Create models simuating 3 shard training">Create models simuating 3 shard training</a></li>
-                    <li><a href="#Create models simuating 4 shard training">Create models simuating 4 shard training</a></li>
             </ul>
             <ul>
                 <h3>&nbspSystem under test</h3>
@@ -155,16 +154,13 @@
                     </tr>
 
                     <tr>
-                         <td>Create models simuating 1 shards training</td> <td>48</td> <td>0</td> <td>3.2</td> <td>10.90</td> <td>1.57</td> <td>6.19</td> <td>1.9</td>
+                         <td>Create models simuating 1 shards training</td> <td>48</td> <td>0</td> <td>1.1</td> <td>23.19</td> <td>3.30</td> <td>13.22</td> <td>0.7</td>
                     </tr>
                     <tr>
-                         <td>Create models simuating 2 shard training</td> <td>48</td> <td>0</td> <td>6.4</td> <td>6.97</td> <td>1.57</td> <td>4.21</td> <td>3.6</td>
+                         <td>Create models simuating 2 shard training</td> <td>48</td> <td>0</td> <td>3.2</td> <td>20.32</td> <td>3.46</td> <td>11.88</td> <td>1.4</td>
                     </tr>
                     <tr>
-                         <td>Create models simuating 3 shard training</td> <td>48</td> <td>0</td> <td>9.6</td> <td>6.01</td> <td>1.54</td> <td>3.67</td> <td>4.4</td>
-                    </tr>
-                    <tr>
-                         <td>Create models simuating 4 shard training</td> <td>48</td> <td>0</td> <td>12.8</td> <td>5.33</td> <td>1.55</td> <td>3.34</td> <td>5.9</td>
+                         <td>Create models simuating 3 shard training</td> <td>48</td> <td>0</td> <td>5.3</td> <td>16.90</td> <td>3.46</td> <td>9.45</td> <td>1.9</td>
                     </tr>
                 </table>
             </div>
@@ -174,7 +170,7 @@
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">rateControl:
   type: fixed-rate
   opts:
-    tps: 3
+    tps: 1
 </pre>
                         <h3>Performance metrics for Create models simuating 1 shards training</h3>
                             <table style="min-width: 100%;">
@@ -182,7 +178,7 @@
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Create models simuating 1 shards training</td> <td>48</td> <td>0</td> <td>3.2</td> <td>10.90</td> <td>1.57</td> <td>6.19</td> <td>1.9</td>
+                                     <td>Create models simuating 1 shards training</td> <td>48</td> <td>0</td> <td>1.1</td> <td>23.19</td> <td>3.30</td> <td>13.22</td> <td>0.7</td>
                                 </tr>
                             </table>
                         <h3>Resource utilization for Create models simuating 1 shards training</h3>
@@ -194,7 +190,7 @@
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">rateControl:
   type: fixed-rate
   opts:
-    tps: 6
+    tps: 3
 </pre>
                         <h3>Performance metrics for Create models simuating 2 shard training</h3>
                             <table style="min-width: 100%;">
@@ -202,7 +198,7 @@
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Create models simuating 2 shard training</td> <td>48</td> <td>0</td> <td>6.4</td> <td>6.97</td> <td>1.57</td> <td>4.21</td> <td>3.6</td>
+                                     <td>Create models simuating 2 shard training</td> <td>48</td> <td>0</td> <td>3.2</td> <td>20.32</td> <td>3.46</td> <td>11.88</td> <td>1.4</td>
                                 </tr>
                             </table>
                         <h3>Resource utilization for Create models simuating 2 shard training</h3>
@@ -214,7 +210,7 @@
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">rateControl:
   type: fixed-rate
   opts:
-    tps: 9
+    tps: 5
 </pre>
                         <h3>Performance metrics for Create models simuating 3 shard training</h3>
                             <table style="min-width: 100%;">
@@ -222,30 +218,10 @@
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Create models simuating 3 shard training</td> <td>48</td> <td>0</td> <td>9.6</td> <td>6.01</td> <td>1.54</td> <td>3.67</td> <td>4.4</td>
+                                     <td>Create models simuating 3 shard training</td> <td>48</td> <td>0</td> <td>5.3</td> <td>16.90</td> <td>3.46</td> <td>9.45</td> <td>1.9</td>
                                 </tr>
                             </table>
                         <h3>Resource utilization for Create models simuating 3 shard training</h3>
-            </div>
-
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Create models simuating 4 shard training">
-                <h2>Benchmark round: Create models simuating 4 shard training</h2>
-                <p></p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">rateControl:
-  type: fixed-rate
-  opts:
-    tps: 12
-</pre>
-                        <h3>Performance metrics for Create models simuating 4 shard training</h3>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
-                                </tr>
-                                <tr>
-                                     <td>Create models simuating 4 shard training</td> <td>48</td> <td>0</td> <td>12.8</td> <td>5.33</td> <td>1.55</td> <td>3.34</td> <td>5.9</td>
-                                </tr>
-                            </table>
-                        <h3>Resource utilization for Create models simuating 4 shard training</h3>
             </div>
 
             <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;">
@@ -260,7 +236,7 @@ rounds:
     rateControl:
       type: fixed-rate
       opts:
-        tps: 3
+        tps: 1
     workload:
       module: workload&#x2F;createModel.js
       arguments:
@@ -271,7 +247,7 @@ rounds:
     rateControl:
       type: fixed-rate
       opts:
-        tps: 6
+        tps: 3
     workload:
       module: workload&#x2F;createModel.js
       arguments:
@@ -283,7 +259,7 @@ rounds:
     rateControl:
       type: fixed-rate
       opts:
-        tps: 9
+        tps: 5
     workload:
       module: workload&#x2F;createModel.js
       arguments:
@@ -291,20 +267,6 @@ rounds:
           - models0
           - models1
           - models2
-  - label: Create models simuating 4 shard training
-    txNumber: 50
-    rateControl:
-      type: fixed-rate
-      opts:
-        tps: 12
-    workload:
-      module: workload&#x2F;createModel.js
-      arguments:
-        contractIds:
-          - models0
-          - models1
-          - models2
-          - models3
 </pre>
                 <h3>SUT</h3>
                 <pre id="sutdetails">not provided</pre>

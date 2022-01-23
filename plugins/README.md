@@ -50,7 +50,7 @@ git reset --hard $COMMIT_HASH
 Make any changes necessary to the Dockerfile located in the `images/peer` directory (a sample is `Dockerfile.peer`), then
 
 ```sh
-cp ../Sharded-Committee-Consensus-in-Blockchain-based-Federated-Learning/plugins/modelEndorsement/plugin.go core/handlers/endorsement/plugin/plugin.go
+cp ../ScaleSFL/plugins/modelEndorsement/plugin.go core/handlers/endorsement/plugin/plugin.go
 ```
 
 ```sh
