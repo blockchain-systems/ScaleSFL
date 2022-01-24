@@ -1,23 +1,23 @@
 test:
     workers:
         type: local
-        number: 2
+        number: 3
     rounds:
-        - label: Create models simulating 1 shards training
+        - label: Create models simulating 8 shards training
           #   txDuration: &txdur 30
-          txNumber: &txnum 1180
+          txNumber: &txnum 50
           rateControl: &rateControl
               type: fixed-rate
               opts:
-                  tps: 6
+                  tps: 27
           #   rateControl: &rateControl
           #       type: maximum-rate
           #       opts:
-          #           tps: 6.5
+          #           tps: 27.5
           #           step: 0.5
           #           sampleInterval: 5
           #           includeFailed: false
           workload:
               module: workload/createModel.js
               arguments:
-                  contractIds: [models0]
+                  contractIds: [models0,models1,models2,models3,models4,models5,models6,models7]
