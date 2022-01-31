@@ -77,7 +77,7 @@ run_benchmark_shards() {
 }
 
 # Initial config
-set_txcnt $benchmark_config 50
+set_txcnt $benchmark_config 200
 set_workers $benchmark_config 2
 
 run_benchmark_shards $benchmark_config

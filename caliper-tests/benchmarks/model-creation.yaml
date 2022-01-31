@@ -1,11 +1,11 @@
 test:
     workers:
         type: local
-        number: 3
+        number: 2
     rounds:
         - label: Create models simulating 8 shards training
           #   txDuration: &txdur 30
-          txNumber: &txnum 50
+          txNumber: &txnum 200
           rateControl: &rateControl
               type: fixed-rate
               opts:
