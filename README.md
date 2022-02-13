@@ -1,12 +1,17 @@
-# Sharded Committee Consensus for Blockchain based Federated Learning
+# ScaleSFL: Scalable blockchain-based Sharding solution for Federated Learning
 
-In this project we implement the [committee consensus](https://arxiv.org/pdf/2004.00773.pdf) within [Hyperledger Fabric](https://www.hyperledger.org/use/fabric). We extend this algorithm to include a sharding mechanism. This allows for further scalability, and capacity of the network. We test our approach using [Hyperledger Caliper](https://www.hyperledger.org/use/caliper), a benchmarking tool.
+This project implements ScaleSFL (Scalable blockchain-based Sharding solution for Federated Learning). This approach extends previous approaches such as [Committee Consensus](https://arxiv.org/pdf/2004.00773.pdf), by providing a sharding mechanism, where model updates are verified independently within each shard, and further aggregated to produce a global model.
+
+![architecture](report/transaction-flow.png)
+
+This implemention uses [Hyperledger Fabric](https://www.hyperledger.org/use/fabric) as the blockchain platform, using Fabric channels as independent "shards". Federated Learning is implemented using the [Flower](https://flower.dev/) framework. This allows for further scalability, and capacity of the network. We test our approach using [Hyperledger Caliper](https://www.hyperledger.org/use/caliper), a benchmarking tool.
 
 ## Getting Started
 
 ### Prerequisites
 
-Make sure you have the proper [prerequisites](https://hyperledger-fabric.readthedocs.io/en/release-2.2/prereqs.html)  
+Make sure you have the proper Hyperledger Fabric [prerequisites](https://hyperledger-fabric.readthedocs.io/en/release-2.2/prereqs.html)
+
 To get the binaries required to run the project, you can run the command
 
 ```sh
@@ -22,76 +27,38 @@ cd test-network
 
 ### Running the network
 
-This project relies on several componenets to test. The first step is to bring up the test network to bring up the Fabric blockchain. This is based on the test-network provided by [fabric-samples](https://github.com/hyperledger/fabric-samples)
+This project relies on several independent componenets. The first step is to bring up the test network in order to use the Fabric blockchain. This is based on the test-network provided by [fabric-samples](https://github.com/hyperledger/fabric-samples), modified to handle many peers & organizations. Each peer will join a different channel (shard) by default.
+
+#### Create Peer Image
+
+We'll first need to create a fabric peer image with our endorsement plugin built in. Instructions to so can be found in the [plugins](plugins/README.md) folder.
+
+#### Launch Peer Workers
+
+The endorsement plugin relies on the peers for this network, we must launch the peer workers prior to launching the fabric network. We can run locally by using the manager script in `example-participant/fl-service`. You can find instructions in [example-participant](example-participant/README.md), please follow these and run the manager script, e.g.
 
 ```sh
-./network.sh down # remove any containers from previous runs (optional)
-./network.sh up -ca
+python manager.py -p 8 -s 8 --num-threads=1
 ```
 
-To create a channel we can use the following command
+#### Launch Fabric network
+
+Now we can bring up the network by running
 
 ```sh
-./network.sh createChannel -c mainline
-./network.sh createChannel -c shard0
+./startFabric.sh
 ```
 
-Next we'll deploy the model catalyst chaincode to in using
+We can verify each of the peers have joined the correct channel by viewing the channels
 
-```sh
-./network.sh deployCC \
-    -c mainline \
-    -ccn catalyst \
-    -ccp ../chaincode/catalyst \
-    -ccl typescript
-
-./network.sh deployCC \
-    -c shard0 \
-    -ccn models0 \
-    -ccp ../chaincode/shard \
-    -ccl typescript
-```
-
-where `-c` is the channel name  
-`-ccn` is the chaincode name  
-`-ccp` is the chaincode path, and  
-`-ccl` is the chaincode language
-
-Next make sure you the binaries are in your path
+Set the correct binaries path, and config directory
 
 ```sh
 export PATH=$(realpath ${PWD}/../bin):$PATH
-```
-
-and set the config directory
-
-```sh
 export FABRIC_CFG_PATH=$(realpath ${PWD}/../config/)
-```
 
-Next we can invoke the chaincode using (only set one peer at a time)
-
-```sh
-# Org1 env variables
-export CORE_PEER_TLS_ENABLED=true
-export CORE_PEER_LOCALMSPID="Org1MSP"
-export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-export CORE_PEER_ADDRESS=localhost:7051
-
-# Org2 env variables
-export CORE_PEER_TLS_ENABLED=true
-export CORE_PEER_LOCALMSPID="Org2MSP"
-export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
-export CORE_PEER_ADDRESS=localhost:9051
-
-# Org3 env variables
-export CORE_PEER_TLS_ENABLED=true
-export CORE_PEER_LOCALMSPID="Org3MSP"
-export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
-export CORE_PEER_ADDRESS=localhost:11051
+. scripts/envVar.sh
+setGlobals 1
 ```
 
 We can check which channels a peer is in using
@@ -100,77 +67,21 @@ We can check which channels a peer is in using
 peer channel list
 ```
 
-Next invoke the chaincode by calling
+#### Shutdown the network
 
-```sh
-peer chaincode invoke \
-    -n catalyst \
-    -C mainline \
-    -o localhost:7050 \
-    --tls \
-    --ordererTLSHostnameOverride orderer.example.com \
-    --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
-    --peerAddresses localhost:7051 \
-    --peerAddresses localhost:9051 \
-    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
-    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
-    -c '{"function":"InitLedger","Args":[]}'
-```
-
-```sh
-peer chaincode invoke \
-    -n models0 \
-    -C shard0 \
-    -o localhost:7050 \
-    --tls \
-    --ordererTLSHostnameOverride orderer.example.com \
-    --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
-    --peerAddresses localhost:7051 \
-    --peerAddresses localhost:9051 \
-    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
-    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
-    -c '{"function":"InitLedger","Args":[]}'
-```
-
-Now query the chaincode, we'll get all shards using
-
-```sh
-peer chaincode query -C mainline -n catalyst -c '{"Args":["GetAllShards"]}'
-```
-
----
-
-Now transfer an asset by
-
-```sh
-peer chaincode invoke \
-    -n basic \
-    -C mainline \
-    -o localhost:7050 \
-    --tls \
-    --ordererTLSHostnameOverride orderer.example.com \
-    --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
-    --peerAddresses localhost:7051 \
-    --peerAddresses localhost:9051 \
-    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
-    --tlsRootCertFiles ${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
-    -c '{"function":"TransferAsset","Args":["asset6","Christopher"]}'
-```
-
-The endorsement policy for chaincode requires transactions be signed by both Org1 and Org2, so the invoke command must target both peers (using --peerAddresses)
-
-Switching to Org2 env, and running
-
-```sh
-peer chaincode query -C mainline -n basic -c '{"Args":["ReadAsset","asset6"]}'
-```
-
-will show the asset has been transferred to "Christopher"
-
----
-
-Finally make sure to bring down the network
+Finally we can bring the network down using
 
 ```sh
 ./network.sh down
 ```
+
+### Testing
+
+We perform workload tests using [Hyperledger Caliper](https://www.hyperledger.org/use/caliper). Instructions to run this on the existing network can be found in [caliper-tests](caliper-tests/README.md).
+
+The analysis for these tests can be found in the [notebooks](example-participant/fl-service/notebooks/caliper-analysis.ipynb).
+
+The main findings from these results show this solution scales with the number of shards
+
+![shards-by-throughput](report/benchmarks/shards-by-throughput.png)
+![tps-by-throughput-avglatency](report/benchmarks/tps-by-throughput-avglatency.png)

@@ -27,8 +27,8 @@ docker run --rm -it hyperledger-plugin sh
 cp $CONTAINER_ID:/go/src/bfl/plugins/modelEndorsement/escc.so escc.so
 ```
 
-Note a sample `escc.so` file has been included in this project  
-Note you'll need to specifiy a flask url in the docker `docker-compose-test-net.yaml` file (for endorsements)
+Note: a sample `escc.so` file has been included in this project  
+Note: you'll need to specifiy a flask url in the docker `docker-compose-test-net.yaml` file (for endorsements)
 
 ---
 

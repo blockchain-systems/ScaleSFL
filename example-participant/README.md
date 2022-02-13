@@ -1,6 +1,6 @@
 # Federated Learning with Flower
 
-For the Example Participant, we use the [Flower](https://flower.dev/) framework. We follow the excellent tutorials from the [docs](https://flower.dev/docs/), to setup a federated learning server, and client. In our scenario, each participant will act as both a client and server.
+For the Example Participant, we use the [Flower](https://flower.dev/) framework. We follow the tutorials from the [docs](https://flower.dev/docs/), to setup a federated learning server, and client. In our scenario, each participant will act as both a client and server.
 
 This will run a gRPC server for federated learning, and we also make use of a local [Flask](https://flask.palletsprojects.com) server to handle our implementation specific needs (such as a way for the peer to evaluate models).
 
@@ -36,10 +36,10 @@ If a requirements.txt file is needed, you can generate it with:
 pip list --not-required --format freeze > requirements.txt
 ```
 
-Finally you can start the servers by running
+Finally you can start the servers by running, e.g.
 
 ```sh
-python manager.py
+python manager.py -p 8 -s 8 --num-threads=1
 ```
 
 ### Fabric SDK Service
