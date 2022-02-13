@@ -28,10 +28,16 @@ def get_eval_fn():
     return evaluate
 
 
-def server_pipline(config: Dict[str, int] = {}, num_clients: int = 0):
+def server_pipeline(
+    config: Dict[str, int] = {},
+    num_clients: int = 0,
+    server_defence: bool = False,
+    save_model_path: str = "model/latest-weights.pkl",
+    load_model_path: str = "model/latest-weights.pkl",
+):
     """Create strategy, start Flower server."""
 
-    parameters = load_model()
+    parameters = load_model(file=load_model_path)
 
     # Define strategy
     strategy = CommitteeStrategy(
@@ -42,18 +48,20 @@ def server_pipline(config: Dict[str, int] = {}, num_clients: int = 0):
         min_available_clients=num_clients,
         eval_fn=get_eval_fn(),
         initial_parameters=parameters,
+        server_defence=server_defence,
+        save_model_path=save_model_path,
         client_port=5000,
         fabric_channel="shard0",
     )
 
     # Start client
-    return strategy, lambda: fl.server.start_server(
-        server_address="localhost:8080",
-        config={"num_rounds": 1, **config},
-        strategy=strategy,
-    )
+    return strategy, {"num_rounds": 1, **config}
 
 
 if __name__ == "__main__":
-    _, start_server = server_pipline()
-    start_server()
+    strategy, config = server_pipeline()
+    fl.server.start_server(
+        server_address="localhost:8080",
+        config=config,
+        strategy=strategy,
+    )

@@ -19,6 +19,8 @@ class CommitteeStrategy(FedAvg):
     def __init__(
         self,
         *args,
+        server_defence: bool = False,
+        save_model_path: str = "model/latest-weights.pkl",
         client_port: int = 5000,
         fabric_channel: str = "shard0",
         chaincode_contract: str = "models0",
@@ -26,6 +28,8 @@ class CommitteeStrategy(FedAvg):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        self.server_defence = server_defence
+        self.save_model_path = save_model_path
         self.client_port = client_port
         self.fabric_channel = fabric_channel
         self.chaincode_contract = chaincode_contract
@@ -46,19 +50,22 @@ class CommitteeStrategy(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        # Convert results
-        endorsed_results = list(
-            filter(
-                lambda result: query_chaincode(
-                    self.fabric_channel,
-                    self.chaincode_contract,
-                    self.chaincode_model_exists_fn,
-                    [f"model_{model_info(result[1])['model_hash']}"],
-                    port=self.client_port,
-                ),
-                results,
+        # Convert results (only if clients have already endorsed updates)
+        if not self.server_defence:
+            endorsed_results = list(
+                filter(
+                    lambda result: query_chaincode(
+                        self.fabric_channel,
+                        self.chaincode_contract,
+                        self.chaincode_model_exists_fn,
+                        [f"model_{model_info(result[1])['model_hash']}"],
+                        port=self.client_port,
+                    ),
+                    results,
+                )
             )
-        )
+        else:
+            endorsed_results = results
         if not endorsed_results:
             return None, {}
         weights_results = [
@@ -68,9 +75,9 @@ class CommitteeStrategy(FedAvg):
         parameters = weights_to_parameters(aggregate(weights_results))
 
         # Save aggregated_weights
-        if parameters:
+        if parameters and self.save_model_path:
             print(f"Saving round {rnd} parameters...")
-            save_model(parameters)
+            save_model(parameters, file=self.save_model_path)
 
         return parameters, {}
 

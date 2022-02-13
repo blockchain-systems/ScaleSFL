@@ -7,7 +7,7 @@ authors = ["Evan Madill <madille@myumanitoba.ca>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 Flask = "^2.0.2"
-flwr = "^0.17.0"
+flwr = { version="^0.17.0", extras=["simulation"] }
 seaborn = "^0.11.2"
 requests = "^2.26.0"
 inquirerpy = "^0.3.0"

@@ -6,11 +6,13 @@ import base64
 import warnings
 
 import requests
+import flwr as fl
 from flask import Flask
 from flask import request, abort
 from flwr.common.typing import EvaluateIns
+from flwr.client.numpy_client import NumPyClientWrapper
 
-from src.client import client_pipline
+from src.client import client_pipeline
 from src.models.utils import (
     client_model_info,
     deserialize_model,
@@ -22,6 +24,7 @@ from src.fabric.chaincode import invoke_chaincode
 
 PORT = int(os.environ.get("PORT", 3000))
 CLIENT_PORT = int(os.environ.get("CLIENT_PORT", PORT)) + 2000
+SERVER_PORT = int(os.environ.get("SERVER_PORT", 8080))
 FABRIC_CHANNEL = os.environ.get("FABRIC_CHANNEL", "shard0")
 CHAINCODE_CONTRACT = os.environ.get("CHAINCODE_CONTRACT", "models0")
 CHAINCODE_CREATE_MODEL_FN = os.environ.get("CHAINCODE_CREATE_MODEL_FN", "CreateModel")
@@ -59,15 +62,15 @@ def start_fl():
         )
 
     # Start a round of FL
-    client.numpy_client.post_model = post_model
-    start_client()
+    wclient.numpy_client.post_model = post_model
+    start_client(f"localhost:{SERVER_PORT}")
 
-    return client_model_info(client)
+    return client_model_info(wclient)
 
 
 @app.route("/model")
 def model():
-    info = client_model_info(client)
+    info = client_model_info(wclient)
 
     return {
         "model_hash": info["model_hash"],
@@ -81,7 +84,7 @@ def model():
 
 @app.route("/model/hash")
 def model_info_hash():
-    info = client_model_info(client)
+    info = client_model_info(wclient)
 
     return {"model_hash": info["model_hash"]}
 
@@ -92,7 +95,7 @@ def evaluate_model():
     parameters_res = deserialize_model(serialized_model)
     parameters = parameters_res.parameters
 
-    eval_res = client.evaluate(EvaluateIns(parameters=parameters, config={}))
+    eval_res = wclient.evaluate(EvaluateIns(parameters=parameters, config={}))
     eval = json.dumps(eval_res)
 
     return eval
@@ -113,8 +116,9 @@ def evaluate_rwset():
         ):
             for write in kvRwSet["writes"]:
                 if TEST_SIMULATE_ENDORSE:
-                    with client.numpy_client.lock:
-                        time.sleep(1.4)
+                    if wclient.numpy_client.lock:
+                        with wclient.numpy_client.lock:
+                            time.sleep(1.4)
                     return {"status": 200}, 200
 
                 _, bc_model = write["key"], json.loads(base64.b64decode(write["value"]))
@@ -132,7 +136,7 @@ def evaluate_rwset():
                     abort(418)  # if not tell them they cant have coffee
 
                 # check if model is good
-                if not endorse_model(client, parameters):
+                if not endorse_model(wclient, parameters):
                     abort(418)  # if not tell them they cant have coffee
 
     # return eval
@@ -146,8 +150,12 @@ if __name__ == "__main__":
         )
 
     # Start flower
-    client, start_client = client_pipline(
+    client = client_pipeline(
         client_id=TEST_SIMULATE_CLIENT_ID, num_clients=TEST_SIMULATE_CLIENTS_COUNT
+    )
+    wclient = NumPyClientWrapper(client)
+    start_client = lambda server_address: fl.client.start_numpy_client(
+        server_address, client=client
     )
 
     # Start Flask
