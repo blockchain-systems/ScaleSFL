@@ -209,16 +209,25 @@ def start_round(num_clients: int = 0, server_port: int = 8080):
     fl_server_thread.join()
 
 
-def simulate_fl(num_clients: int = 0, num_shards: int = 0, num_epochs: int = 1):
+def simulate_fl(
+    num_clients: int = 0,
+    num_shards: int = 0,
+    num_epochs: int = 15,
+    output_file: str = "model/eval.output",
+):
     print(f"Starting FL simulation")
     client_fn = lambda cid: client_pipeline(
         client_id=int(cid), num_clients=num_clients, lock_inference=False
     )
+    global_strategy, _ = server_pipeline(num_clients=num_clients, server_defence=True)
+
+    with open(output_file, "w") as file:
+        file.write("loss,accuracy\n")
 
     for _ in range(num_epochs):
         for shard_id in range(num_shards):
             strategy, config = server_pipeline(
-                {"num_rounds": 3},
+                config={"num_rounds": 1},
                 num_clients=num_clients,
                 server_defence=True,
                 save_model_path=f"model/shard/{shard_id}/latest-weights.pkl",
@@ -244,6 +253,12 @@ def simulate_fl(num_clients: int = 0, num_shards: int = 0, num_epochs: int = 1):
         ]
         parameters = weights_to_parameters(aggregate(weights_results))
         save_model(parameters, file="model/latest-weights.pkl")
+
+        loss, metrics = global_strategy.evaluate(parameters)
+
+        # Write loss and metric outputs
+        with open(output_file, "a") as file:
+            file.write(f"{loss},{metrics['accuracy']}\n")
 
 
 # actions

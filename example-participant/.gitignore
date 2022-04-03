@@ -1,3 +1,4 @@
 data/
 dataset/
 *.pkl
+*.output

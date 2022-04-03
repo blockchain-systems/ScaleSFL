@@ -7,10 +7,9 @@ from logging import INFO, log
 
 import flwr as fl
 from flwr.common import weights_to_parameters, ParametersRes
-from flwr.client.numpy_client import NumPyClientWrapper
 from opacus import PrivacyEngine
 
-from .models.mlp import create_model
+from .models.simple_cnn import create_model
 from .models.evaluation.train_cls import train, test
 from .models.utils import (
     get_parameters,
@@ -19,8 +18,12 @@ from .models.utils import (
     model_info,
     ModelCheckpointInfo,
 )
-from .datasets import mnist_noniid
-from .utils.constants import DEFAULT_LOCAL_EPOCHS, PRIVACY_TARGET_DELTA
+from .datasets import cifar10_noniid, mnist_noniid
+from .utils.constants import (
+    DEFAULT_BATCH_SIZE,
+    DEFAULT_LOCAL_EPOCHS,
+    PRIVACY_TARGET_DELTA,
+)
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -134,11 +137,14 @@ def client_pipeline(
     """Create model, load data, define Flower client, start Flower client."""
 
     # Load model
-    # net = create_model(in_channels=1, dim_out=10, img_size=28)
-    net = create_model(layer_dims=[28 * 28 * 1, 10])
+    # net = create_model(in_channels=3, dim_out=10, img_size=32)
+    net = create_model(in_channels=1, dim_out=10, img_size=28)
+    # net = create_model(layer_dims=[28 * 28 * 1, 10])
 
     # Load data (CIFAR-10)
-    trainloader, testloader = mnist_noniid(client_id=client_id, num_clients=num_clients)
+    trainloader, testloader = mnist_noniid(
+        client_id=client_id, num_clients=num_clients, batch_size=DEFAULT_BATCH_SIZE
+    )
 
     # Start client
     client = CifarClient(
