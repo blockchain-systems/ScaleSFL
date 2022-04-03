@@ -67,6 +67,8 @@ services:
         volumes:
             - ../organizations/fabric-ca/org3:/etc/hyperledger/fabric-ca-server
         container_name: ca_org3
+        networks:
+            - test
 
     ca_org4:
         image: hyperledger/fabric-ca:latest
@@ -85,6 +87,8 @@ services:
         volumes:
             - ../organizations/fabric-ca/org4:/etc/hyperledger/fabric-ca-server
         container_name: ca_org4
+        networks:
+            - test
 
     ca_org5:
         image: hyperledger/fabric-ca:latest
@@ -103,6 +107,8 @@ services:
         volumes:
             - ../organizations/fabric-ca/org5:/etc/hyperledger/fabric-ca-server
         container_name: ca_org5
+        networks:
+            - test
 
     ca_org6:
         image: hyperledger/fabric-ca:latest
@@ -121,6 +127,8 @@ services:
         volumes:
             - ../organizations/fabric-ca/org6:/etc/hyperledger/fabric-ca-server
         container_name: ca_org6
+        networks:
+            - test
 
     ca_org7:
         image: hyperledger/fabric-ca:latest
@@ -139,6 +147,8 @@ services:
         volumes:
             - ../organizations/fabric-ca/org7:/etc/hyperledger/fabric-ca-server
         container_name: ca_org7
+        networks:
+            - test
 
     ca_org8:
         image: hyperledger/fabric-ca:latest
@@ -157,6 +167,8 @@ services:
         volumes:
             - ../organizations/fabric-ca/org8:/etc/hyperledger/fabric-ca-server
         container_name: ca_org8
+        networks:
+            - test
 
     ca_orderer:
         image: hyperledger/fabric-ca:latest
